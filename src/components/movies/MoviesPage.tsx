@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from '../layout/Navbar';
-import { Movie, getPopularMovies, getTopRatedMovies, getUpcomingMovies, getNowPlayingMovies, getTrendingMovies } from '../../services/tmdbApi';
+import { Movie, Genre, getPopularMovies, getTopRatedMovies, getUpcomingMovies, getNowPlayingMovies, getTrendingMovies, getMovieGenres, discoverMoviesByGenres } from '../../services/tmdbApi';
 import HorizontalCarousel from './HorizontalCarousel';
 import MovieSearch from './MovieSearch';
 import { useNavigate } from 'react-router-dom';
@@ -13,6 +13,10 @@ const MoviesPage: React.FC = () => {
   const [trending, setTrending] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  // Estado para géneros y sus carruseles
+  const [genres, setGenres] = useState<Genre[]>([]);
+  const [genresLoading, setGenresLoading] = useState<boolean>(false);
+  const [genreMovies, setGenreMovies] = useState<Record<number, Movie[]>>({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -36,6 +40,31 @@ const MoviesPage: React.FC = () => {
       }
     };
     load();
+  }, []);
+
+  // Cargar géneros y sus películas para los carruseles
+  useEffect(() => {
+    const loadGenres = async () => {
+      try {
+        setGenresLoading(true);
+        const gs = await getMovieGenres();
+        setGenres(gs);
+        const pairs = await Promise.all(
+          gs.map(async (g) => {
+            const items = await discoverMoviesByGenres([g.id], 1);
+            return [g.id, items] as const;
+          })
+        );
+        const map: Record<number, Movie[]> = {};
+        pairs.forEach(([id, items]) => { map[id] = items; });
+        setGenreMovies(map);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setGenresLoading(false);
+      }
+    };
+    loadGenres();
   }, []);
 
   const openDetails = (movie: Movie) => navigate(`/movie/${movie.id}`);
@@ -71,6 +100,21 @@ const MoviesPage: React.FC = () => {
                 variant={i % 2 === 0 ? 'wide' : 'poster'}
               />
             ))}
+            {/* Carruseles por género */}
+            {!genresLoading && genres.length > 0 && (
+              <>
+                {genres.map((g) => (
+                  <HorizontalCarousel
+                    key={`genre-${g.id}`}
+                    title={g.name}
+                    movies={genreMovies[g.id] || []}
+                    onSelect={openDetails}
+                    variant="poster"
+                    viewMoreTo={`/movies/genre/${g.id}`}
+                  />
+                ))}
+              </>
+            )}
           </>
         )}
       </main>

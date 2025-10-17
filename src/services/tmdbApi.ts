@@ -99,23 +99,23 @@ export type CombinedCreditsResponse = {
   crew: CombinedCredit[];
 };
 
-export const getPopularMovies = async (): Promise<Movie[]> => {
-  const response = await tmdbApi.get('/movie/popular');
+export const getPopularMovies = async (page: number = 1): Promise<Movie[]> => {
+  const response = await tmdbApi.get('/movie/popular', { params: { page } });
   return response.data.results;
 };
 
-export const getTopRatedMovies = async (): Promise<Movie[]> => {
-  const response = await tmdbApi.get('/movie/top_rated');
+export const getTopRatedMovies = async (page: number = 1): Promise<Movie[]> => {
+  const response = await tmdbApi.get('/movie/top_rated', { params: { page } });
   return response.data.results;
 };
 
-export const getUpcomingMovies = async (): Promise<Movie[]> => {
-  const response = await tmdbApi.get('/movie/upcoming');
+export const getUpcomingMovies = async (page: number = 1): Promise<Movie[]> => {
+  const response = await tmdbApi.get('/movie/upcoming', { params: { page } });
   return response.data.results;
 };
 
-export const getNowPlayingMovies = async (): Promise<Movie[]> => {
-  const response = await tmdbApi.get('/movie/now_playing');
+export const getNowPlayingMovies = async (page: number = 1): Promise<Movie[]> => {
+  const response = await tmdbApi.get('/movie/now_playing', { params: { page } });
   return response.data.results;
 };
 
@@ -194,29 +194,29 @@ export const getMovieRecommendations = async (movieId: number): Promise<Movie[]>
 };
 
 // MOVIES - Trending
-export const getTrendingMovies = async (window: 'day' | 'week' = 'week'): Promise<Movie[]> => {
-  const response = await tmdbApi.get(`/trending/movie/${window}`);
+export const getTrendingMovies = async (window: 'day' | 'week' = 'week', page: number = 1): Promise<Movie[]> => {
+  const response = await tmdbApi.get(`/trending/movie/${window}`, { params: { page } });
   return response.data.results;
 };
 
 // TV SHOWS endpoints
-export const getPopularTV = async (): Promise<TVShow[]> => {
-  const response = await tmdbApi.get('/tv/popular');
+export const getPopularTV = async (page: number = 1): Promise<TVShow[]> => {
+  const response = await tmdbApi.get('/tv/popular', { params: { page } });
   return response.data.results;
 };
 
-export const getTopRatedTV = async (): Promise<TVShow[]> => {
-  const response = await tmdbApi.get('/tv/top_rated');
+export const getTopRatedTV = async (page: number = 1): Promise<TVShow[]> => {
+  const response = await tmdbApi.get('/tv/top_rated', { params: { page } });
   return response.data.results;
 };
 
-export const getAiringTodayTV = async (): Promise<TVShow[]> => {
-  const response = await tmdbApi.get('/tv/airing_today');
+export const getAiringTodayTV = async (page: number = 1): Promise<TVShow[]> => {
+  const response = await tmdbApi.get('/tv/airing_today', { params: { page } });
   return response.data.results;
 };
 
-export const getOnTheAirTV = async (): Promise<TVShow[]> => {
-  const response = await tmdbApi.get('/tv/on_the_air');
+export const getOnTheAirTV = async (page: number = 1): Promise<TVShow[]> => {
+  const response = await tmdbApi.get('/tv/on_the_air', { params: { page } });
   return response.data.results;
 };
 
@@ -263,16 +263,45 @@ export const getTVGenres = async (): Promise<Genre[]> => {
 };
 
 // DISCOVER by genres
-export const discoverMoviesByGenres = async (genreIds: number[]): Promise<Movie[]> => {
+export const discoverMoviesByGenres = async (genreIds: number[], page: number = 1): Promise<Movie[]> => {
   if (!genreIds || !genreIds.length) return [];
   const response = await tmdbApi.get('/discover/movie', {
     params: {
       with_genres: genreIds.join(','),
       sort_by: 'popularity.desc',
-      include_adult: false
+      include_adult: false,
+      page,
     }
   });
   return response.data.results as Movie[];
+};
+
+export const getMovieCertification = async (movieId: number, countries: string[] = ['ES','US','MX']): Promise<string | null> => {
+  try {
+    const response = await tmdbApi.get(`/movie/${movieId}/release_dates`);
+    const results = response.data?.results || [];
+    for (const c of countries) {
+      const entry = results.find((r: any) => r.iso_3166_1 === c);
+      const cert = entry?.release_dates?.map((rd: any) => rd.certification).find((x: string) => x && x.trim().length > 0);
+      if (cert) return cert;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+export const getMovieLogoPath = async (movieId: number): Promise<string | null> => {
+  try {
+    const response = await tmdbApi.get(`/movie/${movieId}/images`, { params: { include_image_language: 'es,en,null' } });
+    const logos = response.data?.logos || [];
+    const pick = logos
+      .sort((a: any, b: any) => (b.vote_count ?? 0) - (a.vote_count ?? 0))
+      .find((l: any) => l.iso_639_1 === 'es') || logos.find((l: any) => l.iso_639_1 === 'en') || logos[0];
+    return pick?.file_path ? pick.file_path : null;
+  } catch {
+    return null;
+  }
 };
 
 export default tmdbApi;

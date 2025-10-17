@@ -177,6 +177,24 @@ code {
     @apply bg-opacity-60;
   }
 
+  .carousel-scrollbar-track {
+    position: relative;
+    width: 100%;
+    height: 6px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(6px);
+  }
+  .carousel-scrollbar-thumb {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 6px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.6);
+    transition: width 200ms ease, transform 200ms ease, left 200ms ease, opacity 200ms ease;
+  }
+
   /* Utilidades generalizadas */
   .glass {
     border-radius: 32px;

@@ -25,7 +25,9 @@ const Navbar: React.FC = () => {
   const [suggestions, setSuggestions] = useState<MultiResult[]>([]);
   const [loadingSuggest, setLoadingSuggest] = useState(false);
   const [openSuggest, setOpenSuggest] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const debounceRef = useRef<number | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!term || term.trim().length < 2) {
@@ -83,17 +85,36 @@ const Navbar: React.FC = () => {
     return () => document.removeEventListener('mousedown', onDocClick);
   }, []);
 
+  // Opacidad dinámica del navbar según el scroll
+  const [navOpacity, setNavOpacity] = useState(1);
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY;
+      const o = Math.max(0.25, 1 - y / 300); // entre 1 (sin scroll) y 0.25
+      setNavOpacity(o);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true } as any);
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   const navPill = ({ isActive }: { isActive: boolean }) =>
     `${isActive ? 'glass-strong text-tertiary' : 'btn-primary'} px-4 py-1.5 text-sm rounded-full whitespace-nowrap`;
 
   return (
-    <nav className="glass-nav bg-opacity-30 border-primary/20 shadow-md relative z-[100]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 gap-4">
-          {/* Izquierda: Nombre de la app */}
-          <div className="flex items-center min-w-[96px]">
-            <Link to="/" aria-label="Inicio" className="text-tertiary text-xl font-bold">
-              WatchIt
+    <nav
+      className="glass-nav sticky top-0 left-0 right-0 border-primary/20 shadow-md z-[200]"
+      style={{
+        ['--glass-bg' as any]: `rgba(244,244,244,${0.012 * navOpacity})`,
+        ['--glass-border' as any]: `rgba(244,244,244,${0.08 * navOpacity})`,
+      }}
+    >
+      <div className="w-full px-4 sm:px-8 lg:px-10">
+        <div className="flex items-center justify-between h-16 gap-8 sm:gap-12">
+          {/* Izquierda: Logo de la app */}
+          <div className="flex items-center min-w-[160px]">
+            <Link to="/" aria-label="Inicio" className="ml-2 sm:ml-4 inline-flex items-center">
+              <img src="/Black Minimalist Tie Film Logo.svg" alt="Watchlt" className="h-8 sm:h-10 w-auto" />
             </Link>
           </div>
 
@@ -105,28 +126,44 @@ const Navbar: React.FC = () => {
               <NavLink to="/compare" className={navPill}>Comparaciones</NavLink>
             </div>
 
-            {/* Buscador universal */}
-            <div className="relative w-full max-w-md">
-              <input
-                type="text"
-                value={term}
-                onChange={(e) => setTerm(e.target.value)}
-                onFocus={() => term.length >= 2 && setOpenSuggest(true)}
-                placeholder="Buscar: película, serie o persona..."
-                className="glass-input search-input w-full pl-4 pr-10 h-[40px] rounded-[20px] placeholder:text-tertiary/70"
-              />
-              <button aria-label="Buscar" className="search-icon-btn" onClick={handleSubmitUniversal}>
-                <MagnifyingGlassIcon className="w-5 h-5 text-tertiary" />
-              </button>
-              {openSuggest && (suggestions.length > 0 || loadingSuggest) && (
-                <div className="absolute z-[200] mt-2 w-full glass-panel bg-primary/90 border border-primary/60 shadow-xl rounded-xl max-h-96 overflow-auto">
+            {/* Buscador inline animado */}
+            <div className="relative">
+              <div className={`flex items-center gap-2 glass-strong rounded-full shadow-md transition-all duration-300 overflow-hidden ${searchOpen ? 'w-80 px-2' : 'w-10'}`}>
+                <button
+                  aria-label={searchOpen ? 'Buscar' : 'Abrir buscador'}
+                  className="w-10 h-10 flex items-center justify-center"
+                  aria-expanded={searchOpen}
+                  onClick={() => {
+                    if (!searchOpen) {
+                      setSearchOpen(true);
+                      setTimeout(() => inputRef.current?.focus(), 0);
+                    } else {
+                      handleSubmitUniversal();
+                    }
+                  }}
+                >
+                  <MagnifyingGlassIcon className="w-5 h-5 text-tertiary transition-transform duration-200" />
+                </button>
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={term}
+                  onChange={(e) => setTerm(e.target.value)}
+                  onFocus={() => term.length >= 2 && setOpenSuggest(true)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleSubmitUniversal(); }}
+                  placeholder="Buscar: película, serie o persona..."
+                  className={`glass-input h-9 rounded-full flex-1 placeholder:text-tertiary/70 bg-transparent transition-opacity duration-200 ${searchOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                />
+              </div>
+              {openSuggest && (suggestions.length > 0 || loadingSuggest) && searchOpen && (
+                <div className="absolute left-0 top-12 w-80 glass-panel p-3 border border-primary/60 rounded-xl shadow-xl">
                   {loadingSuggest && (
-                    <div className="p-3 text-sm text-tertiary/80">Buscando...</div>
+                    <div className="p-2 text-sm text-tertiary/80">Buscando...</div>
                   )}
                   {suggestions.map((s) => (
                     <button
                       key={`${s.media_type}-${s.id}`}
-                      className="w-full text-left px-3 py-2 hover:bg-primary/60 transition-colors flex items-center gap-3"
+                      className="w-full text-left px-3 py-2 hover:bg-primary/60 transition-colors flex items-center gap-3 rounded-lg"
                       onClick={() => handleSelect(s)}
                     >
                       <img
@@ -160,9 +197,10 @@ const Navbar: React.FC = () => {
           </div>
 
           {/* Derecha: Perfil */}
-          <div className="flex items-center justify-end min-w-[120px]">
+          <div className="flex items-center justify-end min-w-[200px]">
             {currentUser && !isGuest ? (
-              <div className="relative" ref={menuRef}>
+              <div className="relative flex items-center gap-3" ref={menuRef}>
+                <span className="hidden sm:inline text-tertiary">Hola, {displayName}</span>
                 <button
                   onClick={() => setMenuOpen((v) => !v)}
                   className="btn-primary flex items-center gap-2 px-3 py-1.5"
@@ -177,14 +215,15 @@ const Navbar: React.FC = () => {
                     </div>
                   )}
                 </button>
-                {menuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 glass-panel p-2">
-                    <div className="px-2 py-1 text-xs text-tertiary/70">{displayName}</div>
-                    <button className="w-full text-left btn-primary px-3 py-2 mb-1" onClick={() => { setMenuOpen(false); navigate('/profile'); }}>Mi perfil</button>
-                    <button className="w-full text-left btn-primary px-3 py-2 mb-1" onClick={() => { setMenuOpen(false); navigate('/settings'); }}>Configuraciones</button>
-                    <button className="w-full text-left btn-accent px-3 py-2" onClick={handleLogout}>Cerrar sesión</button>
-                  </div>
-                )}
+                <div
+                  className={`absolute right-0 top-full mt-2 w-56 glass-panel p-2 border border-primary/60 rounded-xl shadow-xl z-[300] transition-all duration-200 ease-out origin-top transform ${menuOpen ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' : 'opacity-0 -translate-y-2 scale-95 pointer-events-none'}`}
+                  aria-hidden={!menuOpen}
+                >
+                  <div className="px-2 py-1 text-xs text-tertiary/70">{displayName}</div>
+                  <button className="w-full text-left btn-primary px-3 py-2 mb-1" onClick={() => { setMenuOpen(false); navigate('/profile'); }}>Mi perfil</button>
+                  <button className="w-full text-left btn-primary px-3 py-2 mb-1" onClick={() => { setMenuOpen(false); navigate('/settings'); }}>Configuraciones</button>
+                  <button className="w-full text-left btn-accent px-3 py-2" onClick={handleLogout}>Cerrar sesión</button>
+                </div>
               </div>
             ) : (
               <Link

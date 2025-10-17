@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Navbar from '../layout/Navbar';
-import { Movie, getMovieDetails, getMovieVideos, MovieVideo, getMovieRecommendations } from '../../services/tmdbApi';
+import { Movie, getMovieDetails, getMovieVideos, MovieVideo, getMovieRecommendations, getMovieCertification, getMovieLogoPath } from '../../services/tmdbApi';
 import { useAuth } from '../../contexts/AuthContext';
 import { getItemStates, setUserRating, toggleLike, toggleWatchLater, setLikeReason, setRatingReason } from '../../services/userData';
 import { HeartIcon as HeartOutline, BookmarkIcon as BookmarkOutline, StarIcon as StarOutline } from '@heroicons/react/24/outline';
@@ -24,6 +24,8 @@ const MovieDetails: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [reason, setReason] = useState<string>('');
   const [savingReason, setSavingReason] = useState(false);
+  const [logoPath, setLogoPath] = useState<string | null>(null);
+  const [certification, setCertification] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -40,6 +42,17 @@ const MovieDetails: React.FC = () => {
         const trailerVid = videos.find(v => v.site === 'YouTube' && v.type === 'Trailer')
           || videos.find(v => v.site === 'YouTube');
         setTrailer(trailerVid || null);
+
+        // Cargar logo del título y certificación de estreno
+        try {
+          const [logo, cert] = await Promise.all([
+            getMovieLogoPath(movieId),
+            getMovieCertification(movieId)
+          ]);
+          setLogoPath(logo);
+          setCertification(cert);
+        } catch {}
+
 
         if (currentUser && !isGuest) {
           const st = await getItemStates(currentUser.uid, 'movie', movieId);
@@ -168,117 +181,96 @@ const MovieDetails: React.FC = () => {
         )}
         {movie && (
           <>
-            {/* Hero con fondo del backdrop y capa glass */}
+            {/* Hero con poster de fondo y overlays */}
             <section
               className="relative rounded-[32px] overflow-hidden mb-6"
               style={{
                 backgroundImage: movie.backdrop_path
                   ? `url(https://image.tmdb.org/t/p/original${movie.backdrop_path})`
-                  : undefined,
-                backgroundSize: 'cover',
+                  : (movie.poster_path ? `url(https://image.tmdb.org/t/p/original${movie.poster_path})` : undefined),
+                backgroundSize: movie.backdrop_path ? 'cover' : 'contain',
+                backgroundRepeat: 'no-repeat',
                 backgroundPosition: 'center',
+                backgroundColor: '#000',
               }}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/10" />
-              <div className="relative z-10 p-4 md:p-8 glass-strong">
-                <div className="flex flex-col md:flex-row gap-6 items-start">
-                  <div className="w-40 md:w-48 lg:w-56 shrink-0 glass-card overflow-hidden">
-                    <img
-                      src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : 'https://via.placeholder.com/500x750?text=No+Image'}
-                      alt={movie.title}
-                      className="w-full h-full object-cover rounded-[24px]"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <h1 className="text-3xl md:text-4xl font-bold text-tertiary mb-1">
-                      {movie.title} {movie.release_date ? `(${new Date(movie.release_date).getFullYear()})` : ''}
-                    </h1>
-                    {movie.tagline && (
-                      <p className="text-tertiary/80 italic mb-2">{movie.tagline}</p>
-                    )}
-                    <p className="text-tertiary/90 mb-4">
-                      {movie.release_date ? new Date(movie.release_date).toLocaleDateString() : '—'}
-                      {movie.runtime ? ` • ${movie.runtime} min` : ''}
-                      {movie.genres?.length ? ` • ${movie.genres.map(g => g.name).join(', ')}` : ''}
-                    </p>
-                    <div className="flex flex-wrap items-center gap-3 mb-4">
-                      <span className="glass px-3 py-1 text-sm">{movie.status || '—'}</span>
-                      <span className="glass px-3 py-1 text-sm">Idioma: {movie.original_language?.toUpperCase?.() || '—'}</span>
-                      <span className="glass px-3 py-1 text-sm">⭐ {movie.vote_average?.toFixed(1) ?? '—'}</span>
+              <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-black/90" />
+              <div className="relative z-10 min-h-[380px] md:min-h-[500px]">
+                {/* Logo o título arriba izquierda */}
+                {logoPath ? (
+                  <img
+                    src={`https://image.tmdb.org/t/p/original${logoPath}`}
+                    alt={movie.title}
+                    className="absolute top-6 left-6 h-16 md:h-20 object-contain"
+                  />
+                ) : (
+                  <h1 className="absolute top-6 left-6 text-3xl md:text-4xl font-bold text-tertiary">{movie.title}</h1>
+                )}
+
+
+                {/* Metadatos a la derecha */}
+                <div className="absolute bottom-6 right-6 flex flex-row items-center gap-2 flex-wrap text-xs md:text-sm justify-end">
+                  <div className="tinted-glass glass-strong px-3 py-1 rounded-full">{movie.runtime ? `${movie.runtime} min` : '—'}</div>
+                  <div className="tinted-glass glass-strong px-3 py-1 rounded-full">{movie.release_date ? new Date(movie.release_date).toLocaleDateString() : '—'}</div>
+                  <div className="tinted-glass glass-strong px-3 py-1 rounded-full">{certification || '—'}</div>
+                  <div className="tinted-glass glass-strong px-3 py-1 rounded-full">TMDb {typeof movie.vote_average === 'number' ? movie.vote_average.toFixed(1) : '—'}</div>
+                </div>
+
+                {/* Botón de tráiler a la izquierda y acciones debajo */}
+                <div className="absolute bottom-6 left-6 flex flex-col gap-3">
+                  {trailer && (
+                    <a
+                      href={`https://www.youtube.com/watch?v=${trailer.key}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="btn-accent text-sm px-3 py-1 rounded-lg w-fit"
+                    >
+                      Ver tráiler
+                    </a>
+                  )}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <button
+                      className={`glass-strong tinted-glass px-3 py-2 rounded-full flex items-center gap-2 ${liked ? 'border-primary/50' : ''}`}
+                      onClick={toggleLikeHandler}
+                      aria-pressed={liked}
+                      disabled={saving}
+                      title={liked ? 'Quitar Me gusta' : 'Me gusta'}
+                    >
+                      {liked ? <HeartSolid className="w-5 h-5 text-red-400"/> : <HeartOutline className="w-5 h-5"/>}
+                      <span className="text-sm">Me gusta</span>
+                    </button>
+                    <button
+                      className={`glass-strong tinted-glass px-3 py-2 rounded-full flex items-center gap-2 ${inWatchlist ? 'border-primary/50' : ''}`}
+                      onClick={toggleWatchLaterHandler}
+                      aria-pressed={inWatchlist}
+                      disabled={saving}
+                      title={inWatchlist ? 'Quitar de Ver más tarde' : 'Ver más tarde'}
+                    >
+                      {inWatchlist ? <BookmarkSolid className="w-5 h-5 text-yellow-300"/> : <BookmarkOutline className="w-5 h-5"/>}
+                      <span className="text-sm">Guardar</span>
+                    </button>
+                    <div className="glass-strong tinted-glass px-2 py-1 rounded-full flex items-center gap-1">
+                      {[1,2,3,4,5].map((i) => (
+                        <button key={i} onClick={() => onRate(i)} aria-label={`Calificar ${i}`} className="p-1 rating-star">
+                          {userRating && userRating >= i ? (
+                            <StarSolid className="w-5 h-5 text-yellow-300"/>
+                          ) : (
+                            <StarOutline className="w-5 h-5"/>
+                          )}
+                        </button>
+                      ))}
+                      <span className="ml-1 text-sm opacity-80">{userRating ? `${userRating}/5` : 'Calificar'}</span>
                     </div>
-                    <div className="flex gap-3 items-center flex-wrap relative">
-                      {trailer && (
-                        <a
-                          href={`https://www.youtube.com/watch?v=${trailer.key}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="btn-primary"
-                        >
-                          Ver tráiler
-                        </a>
-                      )}
-                      <button
-                        className={`glass px-3 py-2 rounded-xl flex items-center gap-2 ${liked ? 'border-primary/50' : ''}`}
-                        onClick={toggleLikeHandler}
-                        aria-pressed={liked}
-                        disabled={saving}
-                        title={liked ? 'Quitar Me gusta' : 'Me gusta'}
-                      >
-                        {liked ? <HeartSolid className="w-5 h-5 text-red-400"/> : <HeartOutline className="w-5 h-5"/>}
-                        <span className="text-sm">Me gusta</span>
-                      </button>
-                      <button
-                        className={`glass px-3 py-2 rounded-xl flex items-center gap-2 ${inWatchlist ? 'border-primary/50' : ''}`}
-                        onClick={toggleWatchLaterHandler}
-                        aria-pressed={inWatchlist}
-                        disabled={saving}
-                        title={inWatchlist ? 'Quitar de Ver más tarde' : 'Ver más tarde'}
-                      >
-                        {inWatchlist ? <BookmarkSolid className="w-5 h-5 text-yellow-300"/> : <BookmarkOutline className="w-5 h-5"/>}
-                        <span className="text-sm">Ver más tarde</span>
-                      </button>
-                      <div className="glass-strong tinted-glass px-2 py-1 rounded-full flex items-center gap-1">
-                        {[1,2,3,4,5].map((i) => (
-                          <button key={i} onClick={() => onRate(i)} aria-label={`Calificar ${i}`}
-                            className="p-1 rating-star">
-                            {userRating && userRating >= i ? (
-                              <StarSolid className="w-5 h-5 text-yellow-300"/>
-                            ) : (
-                              <StarOutline className="w-5 h-5"/>
-                            )}
-                          </button>
-                        ))}
-                        <span className="ml-1 text-sm opacity-80">{userRating ? `${userRating}/5` : 'Calificar'}</span>
-                      </div>
-                      {/* Metadatos junto a la calificación */}
-                      <div className="w-full -mt-1 flex flex-wrap items-center gap-2 text-xs text-tertiary/90">
-                        <span className="glass px-2 py-1 rounded-full">TMDb: {typeof movie.vote_average === 'number' ? movie.vote_average.toFixed(1) : '—'}/10</span>
-                        {typeof movie.vote_count === 'number' && (
-                          <span className="glass px-2 py-1 rounded-full">{movie.vote_count.toLocaleString()} votos</span>
-                        )}
-                        {typeof movie.popularity === 'number' && (
-                          <span className="glass px-2 py-1 rounded-full">Popularidad: {Math.round(movie.popularity)}</span>
-                        )}
-                      </div>
+                  </div>
+                </div>
+              </div>
+            </section>
 
                       {/* Botones de comparación en móvil (inline) */}
                       <button className="glass px-3 py-2 rounded-xl text-sm md:hidden" onClick={onAddCompare}>Agregar a comparación</button>
                       <button className="glass px-3 py-2 rounded-xl text-sm md:hidden" onClick={() => navigate('/compare')}>Ver comparación</button>
 
-                    </div>
-                  </div>
-                </div>
-                {/* Botones de comparación flotantes (desktop) anclados al hero */}
-                <div className="hidden md:flex absolute bottom-4 right-4 gap-2">
-                  <button className="glass-strong px-4 py-2 rounded-xl text-sm hover:scale-105 transition-transform" onClick={onAddCompare}>
-                    Agregar a comparación
-                  </button>
-                  <button className="glass-strong px-4 py-2 rounded-xl text-sm hover:scale-105 transition-transform" onClick={() => navigate('/compare')}>
-                    Ver comparación
-                  </button>
-                </div>
-              </div>
-            </section>
+
 
             {/* Cuerpo distribuido */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

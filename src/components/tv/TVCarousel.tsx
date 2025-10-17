@@ -1,5 +1,6 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useRef as useRefReact } from 'react';
+import { Link } from 'react-router-dom';
 import { TVShow, getTVDetails } from '../../services/tmdbApi';
 
 type Props = {
@@ -8,13 +9,62 @@ type Props = {
   onSelect: (show: TVShow) => void;
 };
 
+const toTVSectionSlug = (title: string): string | null => {
+  const t = title.toLowerCase();
+  if (t.includes('popular')) return 'popular';
+  if (t.includes('mejor calific')) return 'top_rated';
+  if (t.includes('hoy')) return 'airing_today';
+  if (t.includes('aire')) return 'on_the_air';
+  return null;
+};
+
 const TVCarousel: React.FC<Props> = ({ title, shows, onSelect }) => {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [detailsCache, setDetailsCache] = useState<Record<number, Partial<TVShow>>>({});
   const fetchingIdsRef = useRefReact<Set<number>>(new Set());
+  const [isScrolling, setIsScrolling] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [thumbWidth, setThumbWidth] = useState(8);
+  const [thumbLeft, setThumbLeft] = useState(0);
+  const scrollTimeoutRef = useRef<number | null>(null);
 
   const scrollLeft = () => scrollerRef.current?.scrollBy({ left: -600, behavior: 'smooth' });
   const scrollRight = () => scrollerRef.current?.scrollBy({ left: 600, behavior: 'smooth' });
+
+  const onScroll = () => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    const progress = max > 0 ? el.scrollLeft / max : 0;
+    setScrollProgress(progress);
+    const w = Math.max(6, Math.min(100, (el.clientWidth / el.scrollWidth) * 100));
+    setThumbWidth(w);
+    setThumbLeft(progress * (100 - w));
+    setIsScrolling(true);
+    if (scrollTimeoutRef.current) window.clearTimeout(scrollTimeoutRef.current);
+    scrollTimeoutRef.current = window.setTimeout(() => setIsScrolling(false), 800);
+  };
+
+  const onWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    // Solo permitir desplazamiento horizontal con Shift. Sin Shift, no mover el carrusel.
+    if (e.shiftKey) {
+      e.preventDefault();
+      const delta = e.deltaY !== 0 ? e.deltaY : e.deltaX;
+      el.scrollLeft += delta;
+    }
+  };
+
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const w = Math.max(6, Math.min(100, (el.clientWidth / el.scrollWidth) * 100));
+    setThumbWidth(w);
+    const max = el.scrollWidth - el.clientWidth;
+    const progress = max > 0 ? el.scrollLeft / max : 0;
+    setThumbLeft(progress * (100 - w));
+  }, [shows]);
 
   const ensureDetails = async (id: number) => {
     if (detailsCache[id] || fetchingIdsRef.current.has(id)) return;
@@ -45,16 +95,23 @@ const TVCarousel: React.FC<Props> = ({ title, shows, onSelect }) => {
         />
       )}
       <div className="relative glass-panel p-4 md:p-6">
-        <h3 className="text-tertiary text-xl font-semibold mb-3">{title}</h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-tertiary text-xl font-semibold">{title}</h3>
+          {toTVSectionSlug(title) && (
+            <Link to={`/tv/section/${toTVSectionSlug(title)}`} className="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-tertiary text-sm">
+              Ver más
+            </Link>
+          )}
+        </div>
         <div className="relative">
           <button
             className="carousel-arrow absolute top-1/2 -translate-y-1/2 left-2"
             onClick={scrollLeft}
             aria-label="Scroll left"
           >
-            Ⴙ
+            <img src="/arrow_back_ios_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg" alt="Izquierda" className="w-4 h-4 block filter invert" />
           </button>
-          <div ref={scrollerRef} className="flex gap-4 overflow-x-auto py-2 snap-x snap-mandatory scrollbar-hide">
+          <div ref={scrollerRef} onScroll={onScroll} onWheel={onWheel} className="flex gap-4 overflow-x-auto py-2 snap-x snap-proximity scrollbar-hide">
             {shows.slice(0, 20).map(show => {
               return (
                 <div key={show.id} className="snap-start shrink-0 w-40">
@@ -93,8 +150,13 @@ const TVCarousel: React.FC<Props> = ({ title, shows, onSelect }) => {
             onClick={scrollRight}
             aria-label="Scroll right"
           >
-            Ⴚ
+            <img src="/arrow_forward_ios_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg" alt="Derecha" className="w-4 h-4 block filter invert" />
           </button>
+          <div className={`absolute left-10 right-10 bottom-2 pointer-events-none transition-opacity duration-300`} style={{ opacity: isScrolling ? 1 : 0 }}>
+             <div className="carousel-scrollbar-track">
+               <div className="carousel-scrollbar-thumb" style={{ width: `${thumbWidth}%`, left: `${thumbLeft}%` }} />
+             </div>
+           </div>
         </div>
       </div>
     </section>

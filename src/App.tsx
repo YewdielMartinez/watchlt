@@ -10,7 +10,10 @@ import Profile from './components/profile/Profile';
 import Compare from './components/compare/Compare';
 import MovieDetails from './components/movies/MovieDetails';
 import MoviesPage from './components/movies/MoviesPage';
+import MoviesSectionPage from './components/movies/MoviesSectionPage';
+import MoviesGenrePage from './components/movies/MoviesGenrePage';
 import TVPage from './components/tv/TVPage';
+import TVSectionPage from './components/tv/TVSectionPage';
 import TVDetails from './components/tv/TVDetails';
 import PersonDetails from './components/person/PersonDetails';
 import Settings from './components/settings/Settings';
@@ -60,10 +63,34 @@ function App() {
             } 
           />
           <Route 
+            path="/movies/section/:section" 
+            element={
+              <PrivateRoute>
+                <MoviesSectionPage />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/movies/genre/:id" 
+            element={
+              <PrivateRoute>
+                <MoviesGenrePage />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
             path="/tv" 
             element={
               <PrivateRoute>
                 <TVPage />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/tv/section/:section" 
+            element={
+              <PrivateRoute>
+                <TVSectionPage />
               </PrivateRoute>
             } 
           />

@@ -1,5 +1,6 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useRef as useRefReact } from 'react';
+import { Link } from 'react-router-dom';
 import { Movie, getMovieDetails } from '../../services/tmdbApi';
 
 type Props = {
@@ -8,12 +9,28 @@ type Props = {
   onSelect: (movie: Movie) => void;
   selectedIds?: number[];
   variant?: 'poster' | 'wide';
+  viewMoreTo?: string;
 };
 
-const HorizontalCarousel: React.FC<Props> = ({ title, movies, onSelect, selectedIds = [], variant = 'poster' }) => {
+const toMovieSectionSlug = (title: string): string | null => {
+  const t = title.toLowerCase();
+  if (t.includes('tendenc')) return 'trending';
+  if (t.includes('popular')) return 'popular';
+  if (t.includes('mejor calific')) return 'top_rated';
+  if (t.includes('cartelera')) return 'now_playing';
+  if (t.includes('próxim') || t.includes('proxim')) return 'upcoming';
+  return null;
+};
+
+const HorizontalCarousel: React.FC<Props> = ({ title, movies, onSelect, selectedIds = [], variant = 'poster', viewMoreTo }) => {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [detailsCache, setDetailsCache] = useState<Record<number, Partial<Movie>>>({});
   const fetchingIdsRef = useRefReact<Set<number>>(new Set());
+  const [isScrolling, setIsScrolling] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [thumbWidth, setThumbWidth] = useState(8);
+  const [thumbLeft, setThumbLeft] = useState(0);
+  const scrollTimeoutRef = useRef<number | null>(null);
 
   const scrollLeft = () => {
     scrollerRef.current?.scrollBy({ left: -600, behavior: 'smooth' });
@@ -21,6 +38,43 @@ const HorizontalCarousel: React.FC<Props> = ({ title, movies, onSelect, selected
   const scrollRight = () => {
     scrollerRef.current?.scrollBy({ left: 600, behavior: 'smooth' });
   };
+
+  const onScroll = () => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    const progress = max > 0 ? el.scrollLeft / max : 0;
+    setScrollProgress(progress);
+    // pulgar proporcional y desplazamiento
+    const w = Math.max(6, Math.min(100, (el.clientWidth / el.scrollWidth) * 100));
+    setThumbWidth(w);
+    setThumbLeft(progress * (100 - w));
+    setIsScrolling(true);
+    if (scrollTimeoutRef.current) window.clearTimeout(scrollTimeoutRef.current);
+    scrollTimeoutRef.current = window.setTimeout(() => setIsScrolling(false), 800);
+  };
+
+  const onWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    // Solo permitir desplazamiento horizontal con Shift. Sin Shift, no mover el carrusel.
+    if (e.shiftKey) {
+      e.preventDefault();
+      const delta = e.deltaY !== 0 ? e.deltaY : e.deltaX;
+      el.scrollLeft += delta;
+    }
+  };
+
+  useEffect(() => {
+    // inicializa el pulgar cuando cambian los datos
+    const el = scrollerRef.current;
+    if (!el) return;
+    const w = Math.max(6, Math.min(100, (el.clientWidth / el.scrollWidth) * 100));
+    setThumbWidth(w);
+    const max = el.scrollWidth - el.clientWidth;
+    const progress = max > 0 ? el.scrollLeft / max : 0;
+    setThumbLeft(progress * (100 - w));
+  }, [movies]);
 
   const ensureDetails = async (movieId: number) => {
     if (detailsCache[movieId] || fetchingIdsRef.current.has(movieId)) return;
@@ -52,18 +106,27 @@ const HorizontalCarousel: React.FC<Props> = ({ title, movies, onSelect, selected
         />
       )}
       <div className="relative glass-panel p-4 md:p-6">
-        <h3 className="text-tertiary text-xl font-semibold mb-3">{title}</h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-tertiary text-xl font-semibold">{title}</h3>
+          {(viewMoreTo || toMovieSectionSlug(title)) && (
+            <Link to={viewMoreTo || `/movies/section/${toMovieSectionSlug(title)}`} className="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-tertiary text-sm">
+              Ver más
+            </Link>
+          )}
+        </div>
         <div className="relative">
           <button
             className="carousel-arrow absolute top-1/2 -translate-y-1/2 left-2"
             onClick={scrollLeft}
             aria-label="Scroll left"
           >
-            󰁍
+            <img src="/arrow_back_ios_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg" alt="Izquierda" className="w-4 h-4 block filter invert" />
           </button>
           <div
             ref={scrollerRef}
-            className="flex gap-4 overflow-x-auto py-2 snap-x snap-mandatory scrollbar-hide"
+            onScroll={onScroll}
+            onWheel={onWheel}
+            className="flex gap-4 overflow-x-auto py-2 snap-x snap-proximity scrollbar-hide"
           >
             {movies.slice(0, 20).map((movie) => {
               const selected = selectedIds.includes(movie.id);
@@ -71,7 +134,7 @@ const HorizontalCarousel: React.FC<Props> = ({ title, movies, onSelect, selected
               const cardRing = selected ? 'ring-2 ring-accent' : 'ring-1 ring-primary/30';
 
               return (
-                <div key={movie.id} className={`snap-start shrink-0 ${isWide ? 'w-[20rem] sm:w-[24rem]' : 'w-40'}`}>
+                <div key={movie.id} className={`snap-start shrink-0 ${isWide ? 'w-[20rem] sm:w-[24rem]' : 'w-[185px]'}`}>
                   <div
                     className={`glass-card group p-2 rounded-xl cursor-pointer transition-transform hover:scale-105 ${cardRing}`}
                     onClick={() => onSelect(movie)}
@@ -94,11 +157,11 @@ const HorizontalCarousel: React.FC<Props> = ({ title, movies, onSelect, selected
                         <img
                           src={
                             movie.poster_path
-                              ? `https://image.tmdb.org/t/p/w185${movie.poster_path}`
-                              : 'https://via.placeholder.com/185x278?text=No+Image'
+                              ? `https://image.tmdb.org/t/p/w342${movie.poster_path}`
+                              : 'https://via.placeholder.com/342x513?text=No+Image'
                           }
                           alt={movie.title}
-                          className="w-full h-64 md:h-72 object-cover rounded-md shadow-md"
+                          className="w-[185px] h-[278px] object-cover rounded-md shadow-md"
                         />
                       )}
                       <div className="absolute inset-0 rounded-md bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-2 flex flex-col justify-end">
@@ -125,8 +188,13 @@ const HorizontalCarousel: React.FC<Props> = ({ title, movies, onSelect, selected
             onClick={scrollRight}
             aria-label="Scroll right"
           >
-            󰁎
+            <img src="/arrow_forward_ios_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg" alt="Derecha" className="w-4 h-4 block filter invert" />
           </button>
+          <div className={`absolute left-10 right-10 bottom-2 pointer-events-none transition-opacity duration-300`} style={{ opacity: isScrolling ? 1 : 0 }}>
+             <div className="carousel-scrollbar-track">
+               <div className="carousel-scrollbar-thumb" style={{ width: `${thumbWidth}%`, left: `${thumbLeft}%` }} />
+             </div>
+           </div>
         </div>
       </div>
     </section>
