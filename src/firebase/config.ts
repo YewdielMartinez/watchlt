@@ -3,16 +3,29 @@ import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getAnalytics, isSupported as analyticsIsSupported } from 'firebase/analytics';
 
-// Configuración provista por el usuario
+// Configuración desde variables de entorno
 const firebaseConfig = {
-  apiKey: "AIzaSyBKKY9NRoo4tXrsY1pWPxMk-Z-fwLM502w",
-  authDomain: "watchlt-928e8.firebaseapp.com",
-  projectId: "watchlt-928e8",
-  storageBucket: "watchlt-928e8.firebasestorage.app",
-  messagingSenderId: "57227650475",
-  appId: "1:57227650475:web:622bbf37df882ab8135eee",
-  measurementId: "G-CGN39LDC4L"
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY || '',
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || '',
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || '',
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || '',
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID || '',
+  appId: process.env.REACT_APP_FIREBASE_APP_ID || '',
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
 };
+
+// Aviso en desarrollo si faltan variables esenciales
+if (
+  !firebaseConfig.apiKey ||
+  !firebaseConfig.authDomain ||
+  !firebaseConfig.projectId ||
+  !firebaseConfig.storageBucket ||
+  !firebaseConfig.messagingSenderId ||
+  !firebaseConfig.appId
+) {
+  // eslint-disable-next-line no-console
+  console.warn('Faltan variables de entorno de Firebase. Revisa tu .env.local');
+}
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);

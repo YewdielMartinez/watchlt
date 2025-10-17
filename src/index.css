@@ -26,6 +26,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Reserva espacio para el navbar fijo inferior en móviles */
+@layer base {
+  body { @apply pb-16; }
+  @screen sm { body { @apply pb-0; } }
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;

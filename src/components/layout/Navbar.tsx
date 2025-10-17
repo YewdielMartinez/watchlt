@@ -103,16 +103,16 @@ const Navbar: React.FC = () => {
 
   return (
     <nav
-      className="glass-nav sticky top-0 left-0 right-0 border-primary/20 shadow-md z-[200]"
+      className="glass-nav fixed bottom-0 inset-x-0 sm:sticky sm:top-0 border-primary/20 shadow-md z-[200]"
       style={{
         ['--glass-bg' as any]: `rgba(244,244,244,${0.012 * navOpacity})`,
         ['--glass-border' as any]: `rgba(244,244,244,${0.08 * navOpacity})`,
       }}
     >
       <div className="w-full px-4 sm:px-8 lg:px-10">
-        <div className="flex items-center justify-between h-16 gap-8 sm:gap-12">
+        <div className="hidden sm:flex items-center justify-between h-16 gap-8 sm:gap-12">
           {/* Izquierda: Logo de la app */}
-          <div className="flex items-center min-w-[160px]">
+          <div className="hidden sm:flex items-center min-w-[160px]">
             <Link to="/" aria-label="Inicio" className="ml-2 sm:ml-4 inline-flex items-center">
               <img src="/Black Minimalist Tie Film Logo.svg" alt="Watchlt" className="h-8 sm:h-10 w-auto" />
             </Link>
@@ -127,7 +127,7 @@ const Navbar: React.FC = () => {
             </div>
 
             {/* Buscador inline animado */}
-            <div className="relative">
+            <div className="relative hidden sm:block">
               <div className={`flex items-center gap-2 glass-strong rounded-full shadow-md transition-all duration-300 overflow-hidden ${searchOpen ? 'w-80 px-2' : 'w-10'}`}>
                 <button
                   aria-label={searchOpen ? 'Buscar' : 'Abrir buscador'}
@@ -216,7 +216,7 @@ const Navbar: React.FC = () => {
                   )}
                 </button>
                 <div
-                  className={`absolute right-0 top-full mt-2 w-56 glass-panel p-2 border border-primary/60 rounded-xl shadow-xl z-[300] transition-all duration-200 ease-out origin-top transform ${menuOpen ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' : 'opacity-0 -translate-y-2 scale-95 pointer-events-none'}`}
+                  className={`absolute right-0 sm:top-full sm:mt-2 sm:origin-top bottom-full mb-2 origin-bottom w-56 glass-panel p-2 border border-primary/60 rounded-xl shadow-xl z-[300] transition-all duration-200 ease-out transform ${menuOpen ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' : 'opacity-0 sm:-translate-y-2 translate-y-2 scale-95 pointer-events-none'}`}
                   aria-hidden={!menuOpen}
                 >
                   <div className="px-2 py-1 text-xs text-tertiary/70">{displayName}</div>
@@ -234,6 +234,27 @@ const Navbar: React.FC = () => {
               </Link>
             )}
           </div>
+        </div>
+        {/* Barra de iconos para móvil */}
+        <div className="sm:hidden h-16 px-4 flex items-center justify-around">
+          <NavLink to="/dashboard" className={({ isActive }) => `${isActive ? 'glass-strong' : 'btn-primary'} w-12 h-12 rounded-full flex items-center justify-center`} aria-label="Inicio">
+            <img src="/home_24dp_FFFFFF_FILL0_wght400_GRAD0_opsz24.svg" alt="Inicio" className="w-6 h-6" />
+          </NavLink>
+          <NavLink to="/movies" className={({ isActive }) => `${isActive ? 'glass-strong' : 'btn-primary'} w-12 h-12 rounded-full flex items-center justify-center`} aria-label="Películas">
+            <img src="/movie_24dp_FFFFFF_FILL0_wght400_GRAD0_opsz24.svg" alt="Películas" className="w-6 h-6" />
+          </NavLink>
+          <NavLink to="/compare" className={({ isActive }) => `${isActive ? 'glass-strong' : 'btn-primary'} w-12 h-12 rounded-full flex items-center justify-center`} aria-label="Comparaciones">
+            <img src="/compare_arrows_24dp_FFFFFF_FILL0_wght400_GRAD0_opsz24.svg" alt="Comparaciones" className="w-6 h-6" />
+          </NavLink>
+          {currentUser && !isGuest && avatarUrl ? (
+            <Link to="/profile" className="w-12 h-12 rounded-full overflow-hidden border border-primary/40" aria-label="Perfil">
+              <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
+            </Link>
+          ) : (
+            <Link to="/login" className="btn-primary w-12 h-12 rounded-full flex items-center justify-center" aria-label="Iniciar sesión">
+              <img src="/account_circle_24dp_FFFFFF_FILL0_wght400_GRAD0_opsz24.svg" alt="Cuenta" className="w-6 h-6" />
+            </Link>
+          )}
         </div>
       </div>
     </nav>
