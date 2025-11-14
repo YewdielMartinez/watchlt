@@ -3,17 +3,18 @@
 @tailwind utilities;
 
 /* Fuentes personalizadas: SF Pro (texto) y SF Pro Display Bold (títulos) */
+
 @font-face {
-  font-family: 'SF Pro';
-  src: url('/fonts/SF-Pro.ttf') format('truetype');
+  font-family: "SF Pro";
+  src: url("/fonts/SF-Pro.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'SF Pro Display';
-  src: url('/fonts/SF-Pro-Display-Bold.otf') format('opentype');
+  font-family: "SF Pro Display";
+  src: url("/fonts/SF-Pro-Display-Bold.otf") format("opentype");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -21,19 +22,27 @@
 
 body {
   @apply bg-secondary text-tertiary;
-  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+  font-family: "SF Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 /* Reserva espacio para el navbar fijo inferior en móviles */
+
 @layer base {
-  body { @apply pb-16; }
-  @screen sm { body { @apply pb-0; } }
+  body {
+    @apply pb-16;
+  }
+  @screen sm {
+    body {
+      @apply pb-0;
+    }
+  }
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
 
@@ -54,14 +63,14 @@ code {
     backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(2px);
     border: 1px solid var(--glass-border);
-    transition: background-color .25s ease, border-color .25s ease, transform .2s ease, box-shadow .3s ease;
+    transition: background-color 0.25s ease, border-color 0.25s ease,
+      transform 0.2s ease, box-shadow 0.3s ease;
   }
   .btn-primary:hover {
     background: var(--glass-fill);
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(255,255,255,0.06);
+    box-shadow: 0 6px 20px rgba(255, 255, 255, 0.06);
   }
-  
   .btn-accent {
     @apply text-tertiary font-semibold px-4 py-2 transition;
     border-radius: 32px;
@@ -70,30 +79,28 @@ code {
     backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(2px);
     border: 1px solid var(--glass-border);
-    transition: background-color .25s ease, border-color .25s ease, transform .2s ease, box-shadow .3s ease;
+    transition: background-color 0.25s ease, border-color 0.25s ease,
+      transform 0.2s ease, box-shadow 0.3s ease;
   }
   .btn-accent:hover {
     background: var(--glass-fill);
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(255,255,255,0.06);
+    box-shadow: 0 6px 20px rgba(255, 255, 255, 0.06);
   }
-  
   .nav-link {
     @apply text-tertiary transition-colors;
   }
   .nav-link:hover {
     @apply text-accent;
   }
-  
   .card {
     @apply bg-primary bg-opacity-10 shadow-md rounded-lg overflow-hidden border border-primary border-opacity-20;
   }
-  
   .card-title {
     @apply text-tertiary font-bold text-xl;
-    font-family: 'SF Pro Display', 'SF Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+    font-family: "SF Pro Display", "SF Pro", -apple-system, BlinkMacSystemFont,
+      "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
   }
-  
   .content-container {
     /* Hacemos el contenedor principal casi transparente para ver el fondo */
     @apply bg-transparent p-4 rounded-lg;
@@ -103,18 +110,19 @@ code {
       @apply p-6;
     }
   }
-  
   .section-title {
     @apply text-tertiary text-2xl font-bold mb-4 border-b border-accent pb-2;
-    font-family: 'SF Pro Display', 'SF Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+    font-family: "SF Pro Display", "SF Pro", -apple-system, BlinkMacSystemFont,
+      "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
   }
-
   /* Aplicar fuente de títulos a encabezados semánticos por consistencia */
-  h1, h2, h3 {
-    font-family: 'SF Pro Display', 'SF Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+  h1,
+  h2,
+  h3 {
+    font-family: "SF Pro Display", "SF Pro", -apple-system, BlinkMacSystemFont,
+      "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
     font-weight: 700;
   }
-
   /* Glass / blur helpers */
   .glass-nav {
     background: var(--glass-bg);
@@ -122,9 +130,9 @@ code {
     backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(2px);
     border: 1px solid var(--glass-border);
-    transition: background-color .25s ease, border-color .25s ease, transform .2s ease, box-shadow .3s ease;
+    transition: background-color 0.25s ease, border-color 0.25s ease,
+      transform 0.2s ease, box-shadow 0.3s ease;
   }
-
   .glass-panel {
     border-radius: 32px;
     background: var(--glass-bg);
@@ -132,10 +140,13 @@ code {
     backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(2px);
     border: 1px solid var(--glass-border);
-    transition: background-color .25s ease, border-color .25s ease, transform .2s ease, box-shadow .3s ease;
+    transition: background-color 0.25s ease, border-color 0.25s ease,
+      transform 0.2s ease, box-shadow 0.3s ease;
   }
-  .glass-panel:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(255,255,255,0.06); }
-
+  .glass-panel:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(255, 255, 255, 0.06);
+  }
   .blur-separator {
     border-radius: 8px;
     background: var(--glass-fill);
@@ -143,7 +154,6 @@ code {
     backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(2px);
   }
-  
   .glass-card {
     border-radius: 24px;
     background: var(--glass-bg);
@@ -151,10 +161,13 @@ code {
     backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(2px);
     border: 1px solid var(--glass-border);
-    transition: background-color .25s ease, border-color .25s ease, transform .2s ease, box-shadow .3s ease;
+    transition: background-color 0.25s ease, border-color 0.25s ease,
+      transform 0.2s ease, box-shadow 0.3s ease;
   }
-  .glass-card:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(255,255,255,0.06); }
-
+  .glass-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(255, 255, 255, 0.06);
+  }
   .glass-input {
     @apply text-tertiary w-full;
     border-radius: 32px;
@@ -163,26 +176,25 @@ code {
     background-blend-mode: overlay;
     backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(2px);
-    transition: box-shadow .2s ease, border-color .2s ease, background-color .2s ease;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease,
+      background-color 0.2s ease;
   }
   .glass-input:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(255,255,255,0.15);
-    border-color: rgba(255,255,255,0.55);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.55);
   }
   .glass-input:hover {
-    border-color: rgba(255,255,255,0.35);
-    background-color: rgba(244,244,244,0.05);
-    box-shadow: 0 4px 14px rgba(255,255,255,0.05);
+    border-color: rgba(255, 255, 255, 0.35);
+    background-color: rgba(244, 244, 244, 0.05);
+    box-shadow: 0 4px 14px rgba(255, 255, 255, 0.05);
   }
-  
   .carousel-arrow {
     @apply z-10 bg-primary bg-opacity-40 text-tertiary w-8 h-8 rounded-full flex items-center justify-center border border-primary/30 shadow-sm transition;
   }
   .carousel-arrow:hover {
     @apply bg-opacity-60;
   }
-
   .carousel-scrollbar-track {
     position: relative;
     width: 100%;
@@ -198,9 +210,9 @@ code {
     height: 6px;
     border-radius: 9999px;
     background: rgba(255, 255, 255, 0.6);
-    transition: width 200ms ease, transform 200ms ease, left 200ms ease, opacity 200ms ease;
+    transition: width 200ms ease, transform 200ms ease, left 200ms ease,
+      opacity 200ms ease;
   }
-
   /* Utilidades generalizadas */
   .glass {
     border-radius: 32px;
@@ -219,71 +231,106 @@ code {
     border: 1px solid var(--glass-border);
     animation: liquidGlass 12s ease-in-out infinite;
   }
-
   /* Animación sutil “liquid glass” */
   @keyframes liquidGlass {
-    0% { box-shadow: 0 0 0 rgba(255,255,255,0.02); }
-    50% { box-shadow: 0 12px 32px rgba(255,255,255,0.06); }
-    100% { box-shadow: 0 0 0 rgba(255,255,255,0.02); }
+    0% {
+      box-shadow: 0 0 0 rgba(255, 255, 255, 0.02);
+    }
+    50% {
+      box-shadow: 0 12px 32px rgba(255, 255, 255, 0.06);
+    }
+    100% {
+      box-shadow: 0 0 0 rgba(255, 255, 255, 0.02);
+    }
   }
-
   /* Search components */
-  .search-group { display: flex; align-items: center; }
+  .search-group {
+    display: flex;
+    align-items: center;
+  }
   .search-input {
-    background: rgba(244,244,244,0.06);
-    border-color: rgba(255,255,255,0.25);
+    background: rgba(244, 244, 244, 0.06);
+    border-color: rgba(255, 255, 255, 0.25);
     border-right: 0;
   }
   .search-input:focus {
-    border-color: rgba(255,255,255,0.55);
-    box-shadow: 0 0 0 3px rgba(255,255,255,0.12);
+    border-color: rgba(255, 255, 255, 0.55);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.12);
   }
   .search-button {
-    background: rgba(244,244,244,0.06);
-    border: 1px solid rgba(255,255,255,0.25);
+    background: rgba(244, 244, 244, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.25);
     border-left: 0;
     height: 44px;
   }
   .search-button:hover {
-    background: rgba(244,244,244,0.10);
-    border-color: rgba(255,255,255,0.35);
+    background: rgba(244, 244, 244, 0.1);
+    border-color: rgba(255, 255, 255, 0.35);
   }
   .search-icon-btn {
-    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
-    height: 32px; width: 32px; border-radius: 9999px;
-    background: rgba(244,244,244,0.06);
-    border: 1px solid rgba(255,255,255,0.25);
-    display: inline-flex; align-items: center; justify-content: center;
-    transition: background-color .2s ease, border-color .2s ease, transform .1s ease;
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 32px;
+    width: 32px;
+    border-radius: 9999px;
+    background: rgba(244, 244, 244, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease, border-color 0.2s ease,
+      transform 0.1s ease;
   }
-  .search-icon-btn:hover { background: rgba(244,244,244,0.10); border-color: rgba(255,255,255,0.35); transform: translateY(-50%) scale(1.03); }
-
+  .search-icon-btn:hover {
+    background: rgba(244, 244, 244, 0.1);
+    border-color: rgba(255, 255, 255, 0.35);
+    transform: translateY(-50%) scale(1.03);
+  }
   /* Rating stars micro-interactions */
-  .rating-star { transition: transform .12s ease, filter .2s ease; }
-  .rating-star:hover { transform: scale(1.15); filter: drop-shadow(0 2px 6px rgba(255,255,0,0.15)); }
-  .rating-star:active { transform: scale(0.95); }
+  .rating-star {
+    transition: transform 0.12s ease, filter 0.2s ease;
+  }
+  .rating-star:hover {
+    transform: scale(1.15);
+    filter: drop-shadow(0 2px 6px rgba(255, 255, 0, 0.15));
+  }
+  .rating-star:active {
+    transform: scale(0.95);
+  }
 }
 
 /* Ocultar scrollbar horizontal para apariencia más limpia */
+
 .scrollbar-hide {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
+
 .scrollbar-hide::-webkit-scrollbar {
-  display: none; /* Chrome, Safari */
+  display: none;
+  /* Chrome, Safari */
 }
 
 @layer components {
   /* Tipografías en botones principales */
-  .btn, .btn-primary, .btn-accent, .btn-secondary {
-    font-family: 'SF Pro Display', 'SF Pro', -apple-system, BlinkMacSystemFont,
-      'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+  .btn,
+  .btn-primary,
+  .btn-accent,
+  .btn-secondary {
+    font-family: "SF Pro Display", "SF Pro", -apple-system, BlinkMacSystemFont,
+      "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
     font-weight: 600;
   }
   /* Tipografía para tablas de comparación */
-  .comparison-table, .comparison-table th, .comparison-table td {
-    font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-      'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+  .comparison-table,
+  .comparison-table th,
+  .comparison-table td {
+    font-family: "SF Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, "Noto Sans", sans-serif;
   }
   /* Tinte sutil manteniendo glass */
   .tinted-glass {
@@ -291,5 +338,83 @@ code {
     backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(2px);
     border: 1px solid var(--glass-border);
+  }
+  /* Page transitions */
+  .page-transition {
+    animation-duration: 0.4s;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    animation-fill-mode: both;
+  }
+  .page-transition.fadeIn {
+    animation-name: fadeInScale;
+  }
+  @keyframes fadeInScale {
+    from {
+      opacity: 0;
+      transform: translateY(15px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  /* Animación alternativa más sutil */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  /* Animación con deslizamiento lateral */
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  /* Animación shimmer para efecto de brillo */
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+  .animate-shimmer {
+    animation: shimmer 3s infinite;
+  }
+  /* Animaciones para modales y alertas */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 0.2s ease-out;
+  }
+  .animate-scaleIn {
+    animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 }

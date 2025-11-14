@@ -1,8 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import Navbar from '../layout/Navbar';
-import { TVShow, getPopularTV, getTopRatedTV, getAiringTodayTV, getOnTheAirTV } from '../../services/tmdbApi';
-import TVCarousel from './TVCarousel';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import Navbar from "../layout/Navbar";
+import {
+  TVShow,
+  getPopularTV,
+  getTopRatedTV,
+  getAiringTodayTV,
+  getOnTheAirTV,
+} from "../../services/tmdbApi";
+import TVCarousel from "./TVCarousel";
+import { useNavigate } from "react-router-dom";
 
 const TVPage: React.FC = () => {
   const [popular, setPopular] = useState<TVShow[]>([]);
@@ -10,7 +16,7 @@ const TVPage: React.FC = () => {
   const [airingToday, setAiringToday] = useState<TVShow[]>([]);
   const [onTheAir, setOnTheAir] = useState<TVShow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,13 +27,16 @@ const TVPage: React.FC = () => {
           getPopularTV(),
           getTopRatedTV(),
           getAiringTodayTV(),
-          getOnTheAirTV()
+          getOnTheAirTV(),
         ]);
-        setPopular(p); setTopRated(t); setAiringToday(a); setOnTheAir(o);
-        setError('');
+        setPopular(p);
+        setTopRated(t);
+        setAiringToday(a);
+        setOnTheAir(o);
+        setError("");
       } catch (e) {
         console.error(e);
-        setError('No se pudieron cargar las listas de series');
+        setError("No se pudieron cargar las listas de series");
       } finally {
         setLoading(false);
       }
@@ -41,18 +50,50 @@ const TVPage: React.FC = () => {
     <div className="min-h-screen">
       <Navbar />
       <main className="container mx-auto px-4 py-8 content-container">
-        <h1 className="text-3xl font-bold text-tertiary mb-6 section-title">Series</h1>
+        <h1 className="text-3xl font-bold text-tertiary mb-6 section-title">
+          Series
+        </h1>
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+          <div
+            className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
+            role="alert"
+          >
             <span className="block sm:inline">{error}</span>
+          </div>
+        )}
+        {loading && (
+          <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+            <div className="relative w-20 h-20">
+              <div className="absolute inset-0 border-4 border-accent/30 rounded-full"></div>
+              <div className="absolute inset-0 border-4 border-accent border-t-transparent rounded-full animate-spin"></div>
+            </div>
+            <p className="text-tertiary text-lg font-medium">
+              Cargando series...
+            </p>
           </div>
         )}
         {!loading && (
           <>
-            <TVCarousel title="Populares" shows={popular} onSelect={openDetails} />
-            <TVCarousel title="Mejor calificadas" shows={topRated} onSelect={openDetails} />
-            <TVCarousel title="Emitiéndose hoy" shows={airingToday} onSelect={openDetails} />
-            <TVCarousel title="En el aire" shows={onTheAir} onSelect={openDetails} />
+            <TVCarousel
+              title="Populares"
+              shows={popular}
+              onSelect={openDetails}
+            />
+            <TVCarousel
+              title="Mejor calificadas"
+              shows={topRated}
+              onSelect={openDetails}
+            />
+            <TVCarousel
+              title="Emitiéndose hoy"
+              shows={airingToday}
+              onSelect={openDetails}
+            />
+            <TVCarousel
+              title="En el aire"
+              shows={onTheAir}
+              onSelect={openDetails}
+            />
           </>
         )}
       </main>

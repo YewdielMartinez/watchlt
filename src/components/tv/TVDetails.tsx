@@ -1,12 +1,33 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import Navbar from '../layout/Navbar';
-import { TVShow, getTVDetails, getTVVideos, MovieVideo, getTVRecommendations } from '../../services/tmdbApi';
-import { useAuth } from '../../contexts/AuthContext';
-import { getItemStates, setUserRating, toggleLike, toggleWatchLater } from '../../services/userData';
-import { HeartIcon as HeartOutline, BookmarkIcon as BookmarkOutline, StarIcon as StarOutline } from '@heroicons/react/24/outline';
-import { HeartIcon as HeartSolid, BookmarkIcon as BookmarkSolid, StarIcon as StarSolid } from '@heroicons/react/24/solid';
-import { addToCompare } from '../../services/compareStore';
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import Navbar from "../layout/Navbar";
+import {
+  TVShow,
+  getTVDetails,
+  getTVVideos,
+  MovieVideo,
+  getTVRecommendations,
+  getTVWatchProviders,
+  WatchProviders,
+} from "../../services/tmdbApi";
+import { useAuth } from "../../contexts/AuthContext";
+import {
+  getItemStates,
+  setUserRating,
+  toggleLike,
+  toggleWatchLater,
+} from "../../services/userData";
+import {
+  HeartIcon as HeartOutline,
+  BookmarkIcon as BookmarkOutline,
+  StarIcon as StarOutline,
+} from "@heroicons/react/24/outline";
+import {
+  HeartIcon as HeartSolid,
+  BookmarkIcon as BookmarkSolid,
+  StarIcon as StarSolid,
+} from "@heroicons/react/24/solid";
+import { addToCompare } from "../../services/compareStore";
 
 const TVDetails: React.FC = () => {
   const { id } = useParams();
@@ -16,30 +37,38 @@ const TVDetails: React.FC = () => {
   const [trailer, setTrailer] = useState<MovieVideo | null>(null);
   const [recs, setRecs] = useState<TVShow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const { currentUser, isGuest } = useAuth();
   const [liked, setLiked] = useState(false);
   const [inWatchlist, setInWatchlist] = useState(false);
   const [userRating, setRatingState] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
+  const [watchProviders, setWatchProviders] = useState<WatchProviders | null>(
+    null
+  );
 
   useEffect(() => {
     const load = async () => {
       try {
         setLoading(true);
-        setError('');
-        const [details, videos, recommendations] = await Promise.all([
-          getTVDetails(tvId),
-          getTVVideos(tvId),
-          getTVRecommendations(tvId)
-        ]);
+        setError("");
+        const [details, videos, recommendations, providers] = await Promise.all(
+          [
+            getTVDetails(tvId),
+            getTVVideos(tvId),
+            getTVRecommendations(tvId),
+            getTVWatchProviders(tvId, "MX"),
+          ]
+        );
         setShow(details as TVShow);
         setRecs(recommendations?.slice(0, 12) || []);
-        const trailerVid = videos.find(v => v.site === 'YouTube' && v.type === 'Trailer')
-          || videos.find(v => v.site === 'YouTube');
+        setWatchProviders(providers);
+        const trailerVid =
+          videos.find((v) => v.site === "YouTube" && v.type === "Trailer") ||
+          videos.find((v) => v.site === "YouTube");
         setTrailer(trailerVid || null);
         if (currentUser && !isGuest) {
-          const st = await getItemStates(currentUser.uid, 'tv', tvId);
+          const st = await getItemStates(currentUser.uid, "tv", tvId);
           setLiked(st.liked);
           setInWatchlist(st.inWatchlist);
           setRatingState(st.rating);
@@ -50,7 +79,7 @@ const TVDetails: React.FC = () => {
         }
       } catch (e) {
         console.error(e);
-        setError('No se pudo cargar la información de la serie');
+        setError("No se pudo cargar la información de la serie");
       } finally {
         setLoading(false);
       }
@@ -60,7 +89,7 @@ const TVDetails: React.FC = () => {
 
   const requireAuth = () => {
     if (!currentUser || isGuest) {
-      alert('Inicia sesión para usar listas y calificaciones');
+      alert("Inicia sesión para usar listas y calificaciones");
       return false;
     }
     return true;
@@ -72,7 +101,7 @@ const TVDetails: React.FC = () => {
       setSaving(true);
       const newVal = await toggleLike(currentUser.uid, {
         id: show.id,
-        type: 'tv',
+        type: "tv",
         title: show.name,
         poster_path: show.poster_path,
       });
@@ -88,7 +117,7 @@ const TVDetails: React.FC = () => {
       setSaving(true);
       const newVal = await toggleWatchLater(currentUser.uid, {
         id: show.id,
-        type: 'tv',
+        type: "tv",
         title: show.name,
         poster_path: show.poster_path,
       });
@@ -102,12 +131,16 @@ const TVDetails: React.FC = () => {
     if (!requireAuth() || !show || !currentUser) return;
     try {
       setSaving(true);
-      await setUserRating(currentUser.uid, {
-        id: show.id,
-        type: 'tv',
-        title: show.name,
-        poster_path: show.poster_path,
-      }, val);
+      await setUserRating(
+        currentUser.uid,
+        {
+          id: show.id,
+          type: "tv",
+          title: show.name,
+          poster_path: show.poster_path,
+        },
+        val
+      );
       setRatingState(val);
     } finally {
       setSaving(false);
@@ -116,24 +149,37 @@ const TVDetails: React.FC = () => {
 
   const onAddCompare = () => {
     if (!show) return;
-    const res = addToCompare('tv', {
+    const res = addToCompare("tv", {
       id: show.id,
       name: show.name,
       poster_path: show.poster_path,
       vote_average: show.vote_average,
       first_air_date: show.first_air_date,
     } as any);
-    if (!res.ok) alert(res.reason || 'No se pudo agregar');
-    else alert('Agregado a comparación');
+    if (!res.ok) alert(res.reason || "No se pudo agregar");
+    else alert("Agregado a comparación");
   };
 
   return (
     <div className="min-h-screen">
       <Navbar />
       <main className="container mx-auto px-4 py-8 content-container">
-        {loading && <div>Cargando...</div>}
+        {loading && (
+          <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+            <div className="relative w-20 h-20">
+              <div className="absolute inset-0 border-4 border-accent/30 rounded-full"></div>
+              <div className="absolute inset-0 border-4 border-accent border-t-transparent rounded-full animate-spin"></div>
+            </div>
+            <p className="text-tertiary text-lg font-medium">
+              Cargando serie...
+            </p>
+          </div>
+        )}
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+          <div
+            className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
+            role="alert"
+          >
             <span className="block sm:inline">{error}</span>
           </div>
         )}
@@ -146,8 +192,8 @@ const TVDetails: React.FC = () => {
                 backgroundImage: show.backdrop_path
                   ? `url(https://image.tmdb.org/t/p/original${show.backdrop_path})`
                   : undefined,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
+                backgroundSize: "cover",
+                backgroundPosition: "center",
               }}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/10" />
@@ -155,27 +201,49 @@ const TVDetails: React.FC = () => {
                 <div className="flex flex-col md:flex-row gap-6 items-start">
                   <div className="w-40 md:w-48 lg:w-56 shrink-0 glass-card overflow-hidden">
                     <img
-                      src={show.poster_path ? `https://image.tmdb.org/t/p/w500${show.poster_path}` : 'https://via.placeholder.com/500x750?text=No+Image'}
+                      src={
+                        show.poster_path
+                          ? `https://image.tmdb.org/t/p/w500${show.poster_path}`
+                          : "https://via.placeholder.com/500x750?text=No+Image"
+                      }
                       alt={show.name}
                       className="w-full h-full object-cover rounded-[24px]"
                     />
                   </div>
                   <div className="flex-1">
                     <h1 className="text-3xl md:text-4xl font-bold text-tertiary mb-1">
-                      {show.name} {show.first_air_date ? `(${new Date(show.first_air_date).getFullYear()})` : ''}
+                      {show.name}{" "}
+                      {show.first_air_date
+                        ? `(${new Date(show.first_air_date).getFullYear()})`
+                        : ""}
                     </h1>
                     <p className="text-tertiary/90 mb-4">
-                      {show.first_air_date ? new Date(show.first_air_date).toLocaleDateString() : '—'}
-                      {show.number_of_seasons ? ` • ${show.number_of_seasons} temporadas` : ''}
-                      {show.genres?.length ? ` • ${show.genres.map(g => g.name).join(', ')}` : ''}
+                      {show.first_air_date
+                        ? new Date(show.first_air_date).toLocaleDateString()
+                        : "—"}
+                      {show.number_of_seasons
+                        ? ` • ${show.number_of_seasons} temporadas`
+                        : ""}
+                      {show.genres?.length
+                        ? ` • ${show.genres.map((g) => g.name).join(", ")}`
+                        : ""}
                     </p>
                     <div className="flex flex-wrap items-center gap-3 mb-4">
-                      <span className="glass px-3 py-1 text-sm">{show.status || '—'}</span>
-                      <span className="glass px-3 py-1 text-sm">Idioma: {show.original_language?.toUpperCase?.() || '—'}</span>
-                      <span className="glass px-3 py-1 text-sm">⭐ {show.vote_average?.toFixed?.(1) ?? '—'}</span>
-                      {Array.isArray(show.episode_run_time) && show.episode_run_time[0] && (
-                        <span className="glass px-3 py-1 text-sm">{show.episode_run_time[0]} min/ep</span>
-                      )}
+                      <span className="glass px-3 py-1 text-sm">
+                        {show.status || "—"}
+                      </span>
+                      <span className="glass px-3 py-1 text-sm">
+                        Idioma: {show.original_language?.toUpperCase?.() || "—"}
+                      </span>
+                      <span className="glass px-3 py-1 text-sm">
+                        ⭐ {show.vote_average?.toFixed?.(1) ?? "—"}
+                      </span>
+                      {Array.isArray(show.episode_run_time) &&
+                        show.episode_run_time[0] && (
+                          <span className="glass px-3 py-1 text-sm">
+                            {show.episode_run_time[0]} min/ep
+                          </span>
+                        )}
                     </div>
                     <div className="flex items-center gap-3 flex-wrap">
                       {trailer && (
@@ -189,40 +257,69 @@ const TVDetails: React.FC = () => {
                         </a>
                       )}
                       <button
-                        className={`glass px-3 py-2 rounded-xl flex items-center gap-2 ${liked ? 'border-primary/50' : ''}`}
+                        className={`glass px-3 py-2 rounded-xl flex items-center gap-2 ${
+                          liked ? "border-primary/50" : ""
+                        }`}
                         onClick={toggleLikeHandler}
                         aria-pressed={liked}
                         disabled={saving}
-                        title={liked ? 'Quitar Me gusta' : 'Me gusta'}
+                        title={liked ? "Quitar Me gusta" : "Me gusta"}
                       >
-                        {liked ? <HeartSolid className="w-5 h-5 text-red-400"/> : <HeartOutline className="w-5 h-5"/>}
+                        {liked ? (
+                          <HeartSolid className="w-5 h-5 text-red-400" />
+                        ) : (
+                          <HeartOutline className="w-5 h-5" />
+                        )}
                         <span className="text-sm">Me gusta</span>
                       </button>
                       <button
-                        className={`glass px-3 py-2 rounded-xl flex items-center gap-2 ${inWatchlist ? 'border-primary/50' : ''}`}
+                        className={`glass px-3 py-2 rounded-xl flex items-center gap-2 ${
+                          inWatchlist ? "border-primary/50" : ""
+                        }`}
                         onClick={toggleWatchLaterHandler}
                         aria-pressed={inWatchlist}
                         disabled={saving}
-                        title={inWatchlist ? 'Quitar de Ver más tarde' : 'Ver más tarde'}
+                        title={
+                          inWatchlist
+                            ? "Quitar de Ver más tarde"
+                            : "Ver más tarde"
+                        }
                       >
-                        {inWatchlist ? <BookmarkSolid className="w-5 h-5 text-yellow-300"/> : <BookmarkOutline className="w-5 h-5"/>}
+                        {inWatchlist ? (
+                          <BookmarkSolid className="w-5 h-5 text-yellow-300" />
+                        ) : (
+                          <BookmarkOutline className="w-5 h-5" />
+                        )}
                         <span className="text-sm">Ver más tarde</span>
                       </button>
                       <div className="flex items-center gap-1">
-                        {[1,2,3,4,5].map((i) => (
-                          <button key={i} onClick={() => onRate(i)} aria-label={`Calificar ${i}`}
-                            className="p-1">
+                        {[1, 2, 3, 4, 5].map((i) => (
+                          <button
+                            key={i}
+                            onClick={() => onRate(i)}
+                            aria-label={`Calificar ${i}`}
+                            className="p-1"
+                          >
                             {userRating && userRating >= i ? (
-                              <StarSolid className="w-5 h-5 text-yellow-300"/>
+                              <StarSolid className="w-5 h-5 text-yellow-300" />
                             ) : (
-                              <StarOutline className="w-5 h-5"/>
+                              <StarOutline className="w-5 h-5" />
                             )}
                           </button>
                         ))}
-                        <span className="ml-1 text-sm opacity-80">{userRating ? `${userRating}/5` : 'Calificar'}</span>
+                        <span className="ml-1 text-sm opacity-80">
+                          {userRating ? `${userRating}/5` : "Calificar"}
+                        </span>
                       </div>
-                      <button className="btn text-sm" onClick={onAddCompare}>Agregar a comparación</button>
-                      <button className="btn text-sm" onClick={() => navigate('/compare')}>Ver comparación</button>
+                      <button className="btn text-sm" onClick={onAddCompare}>
+                        Agregar a comparación
+                      </button>
+                      <button
+                        className="btn text-sm"
+                        onClick={() => navigate("/compare")}
+                      >
+                        Ver comparación
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -233,20 +330,34 @@ const TVDetails: React.FC = () => {
               <section className="lg:col-span-2 flex flex-col gap-6">
                 <div className="glass-panel p-6">
                   <h2 className="card-title mb-2">Overview</h2>
-                  <p className="text-tertiary">{show.overview || '—'}</p>
+                  <p className="text-tertiary">{show.overview || "—"}</p>
                 </div>
                 <div className="glass-panel p-6">
                   <h3 className="card-title mb-4">Top Billed Cast</h3>
                   <div className="flex gap-3 overflow-x-auto scrollbar-hide">
-                    {(show.cast || []).map(c => (
+                    {(show.cast || []).map((c) => (
                       <div key={c.id} className="min-w-[140px] glass-card p-2">
                         <img
-                          src={c.profile_path ? `https://image.tmdb.org/t/p/w185${c.profile_path}` : 'https://via.placeholder.com/185x278?text=No+Image'}
+                          src={
+                            c.profile_path
+                              ? `https://image.tmdb.org/t/p/w185${c.profile_path}`
+                              : "https://via.placeholder.com/185x278?text=No+Image"
+                          }
                           alt={c.name}
                           className="h-32 w-full object-cover rounded-md mb-2"
                         />
-                        <div className="text-sm font-medium text-tertiary truncate" title={c.name}>{c.name}</div>
-                        <div className="text-xs text-tertiary/80 truncate" title={c.character}>{c.character}</div>
+                        <div
+                          className="text-sm font-medium text-tertiary truncate"
+                          title={c.name}
+                        >
+                          {c.name}
+                        </div>
+                        <div
+                          className="text-xs text-tertiary/80 truncate"
+                          title={c.character}
+                        >
+                          {c.character}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -256,13 +367,26 @@ const TVDetails: React.FC = () => {
                     <h3 className="card-title mb-4">Recomendaciones</h3>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                       {recs.map((t) => (
-                        <button key={t.id} className="glass-card p-2 text-left" onClick={() => navigate(`/tv/${t.id}`)}>
+                        <button
+                          key={t.id}
+                          className="glass-card p-2 text-left"
+                          onClick={() => navigate(`/tv/${t.id}`)}
+                        >
                           <img
-                            src={t.poster_path ? `https://image.tmdb.org/t/p/w185${t.poster_path}` : 'https://via.placeholder.com/185x278?text=No+Image'}
+                            src={
+                              t.poster_path
+                                ? `https://image.tmdb.org/t/p/w185${t.poster_path}`
+                                : "https://via.placeholder.com/185x278?text=No+Image"
+                            }
                             alt={t.name}
                             className="w-full h-48 object-cover rounded"
                           />
-                          <div className="mt-2 text-xs text-tertiary truncate" title={t.name}>{t.name}</div>
+                          <div
+                            className="mt-2 text-xs text-tertiary truncate"
+                            title={t.name}
+                          >
+                            {t.name}
+                          </div>
                         </button>
                       ))}
                     </div>
@@ -285,17 +409,140 @@ const TVDetails: React.FC = () => {
                 )}
               </section>
               <aside className="lg:col-span-1">
+                {/* Dónde ver */}
+                {watchProviders &&
+                  (watchProviders.flatrate ||
+                    watchProviders.rent ||
+                    watchProviders.buy) && (
+                    <div className="glass-panel p-6 mb-6">
+                      <h3 className="card-title mb-4">Dónde ver</h3>
+
+                      {watchProviders.flatrate &&
+                        watchProviders.flatrate.length > 0 && (
+                          <div className="mb-4">
+                            <h4 className="text-sm text-tertiary/80 font-semibold mb-2">
+                              Streaming
+                            </h4>
+                            <div className="flex flex-wrap gap-2">
+                              {watchProviders.flatrate.map((provider) => (
+                                <div
+                                  key={provider.provider_id}
+                                  className="glass-card p-2 rounded-lg"
+                                  title={provider.provider_name}
+                                >
+                                  <img
+                                    src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
+                                    alt={provider.provider_name}
+                                    className="w-12 h-12 rounded-md object-cover"
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                      {watchProviders.rent &&
+                        watchProviders.rent.length > 0 && (
+                          <div className="mb-4">
+                            <h4 className="text-sm text-tertiary/80 font-semibold mb-2">
+                              Alquilar
+                            </h4>
+                            <div className="flex flex-wrap gap-2">
+                              {watchProviders.rent.map((provider) => (
+                                <div
+                                  key={provider.provider_id}
+                                  className="glass-card p-2 rounded-lg"
+                                  title={provider.provider_name}
+                                >
+                                  <img
+                                    src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
+                                    alt={provider.provider_name}
+                                    className="w-12 h-12 rounded-md object-cover"
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                      {watchProviders.buy && watchProviders.buy.length > 0 && (
+                        <div className="mb-4">
+                          <h4 className="text-sm text-tertiary/80 font-semibold mb-2">
+                            Comprar
+                          </h4>
+                          <div className="flex flex-wrap gap-2">
+                            {watchProviders.buy.map((provider) => (
+                              <div
+                                key={provider.provider_id}
+                                className="glass-card p-2 rounded-lg"
+                                title={provider.provider_name}
+                              >
+                                <img
+                                  src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
+                                  alt={provider.provider_name}
+                                  className="w-12 h-12 rounded-md object-cover"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {watchProviders.link && (
+                        <a
+                          href={watchProviders.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-accent hover:underline mt-2 inline-block"
+                        >
+                          Ver más opciones →
+                        </a>
+                      )}
+                    </div>
+                  )}
+
                 <div className="glass-panel p-6">
                   <h3 className="card-title mb-4">Información</h3>
                   <dl className="text-sm grid grid-cols-1 gap-3">
-                    <div className="flex justify-between"><dt className="text-tertiary/80">Estado</dt><dd className="text-tertiary">{show.status || '—'}</dd></div>
-                    <div className="flex justify-between"><dt className="text-tertiary/80">Idioma original</dt><dd className="text-tertiary">{show.original_language?.toUpperCase?.() || '—'}</dd></div>
-                    <div className="flex justify-between"><dt className="text-tertiary/80">Temporadas</dt><dd className="text-tertiary">{show.number_of_seasons ?? '—'}</dd></div>
-                    <div className="flex justify-between"><dt className="text-tertiary/80">Episodios</dt><dd className="text-tertiary">{show.number_of_episodes ?? '—'}</dd></div>
-                    {Array.isArray(show.episode_run_time) && show.episode_run_time[0] && (
-                      <div className="flex justify-between"><dt className="text-tertiary/80">Duración por episodio</dt><dd className="text-tertiary">{show.episode_run_time[0]} min</dd></div>
-                    )}
-                    <div className="flex justify-between"><dt className="text-tertiary/80">Creadores</dt><dd className="text-tertiary">{show.created_by?.map(c => c.name).join(', ') || '—'}</dd></div>
+                    <div className="flex justify-between">
+                      <dt className="text-tertiary/80">Estado</dt>
+                      <dd className="text-tertiary">{show.status || "—"}</dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-tertiary/80">Idioma original</dt>
+                      <dd className="text-tertiary">
+                        {show.original_language?.toUpperCase?.() || "—"}
+                      </dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-tertiary/80">Temporadas</dt>
+                      <dd className="text-tertiary">
+                        {show.number_of_seasons ?? "—"}
+                      </dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-tertiary/80">Episodios</dt>
+                      <dd className="text-tertiary">
+                        {show.number_of_episodes ?? "—"}
+                      </dd>
+                    </div>
+                    {Array.isArray(show.episode_run_time) &&
+                      show.episode_run_time[0] && (
+                        <div className="flex justify-between">
+                          <dt className="text-tertiary/80">
+                            Duración por episodio
+                          </dt>
+                          <dd className="text-tertiary">
+                            {show.episode_run_time[0]} min
+                          </dd>
+                        </div>
+                      )}
+                    <div className="flex justify-between">
+                      <dt className="text-tertiary/80">Creadores</dt>
+                      <dd className="text-tertiary">
+                        {show.created_by?.map((c) => c.name).join(", ") || "—"}
+                      </dd>
+                    </div>
                   </dl>
                 </div>
               </aside>
