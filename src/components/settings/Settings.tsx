@@ -3,6 +3,7 @@ import Navbar from "../layout/Navbar";
 import { useAuth } from "../../contexts/AuthContext";
 import { fetchUserCollection } from "../../services/userData";
 import { ArrowPathIcon } from "@heroicons/react/24/solid";
+import { GlassElement } from "../shared/Liquid Glass/GlassElement";
 
 type Crit = { key: string; name: string; weight: number };
 
@@ -143,101 +144,112 @@ const Settings: React.FC = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <h1 className="text-2xl font-bold text-tertiary mb-6">Configuración</h1>
 
-        <section className="glass-panel p-6 mb-8">
-          <h2 className="card-title mb-4">Criterios por defecto</h2>
-          <p className="text-tertiary/80 text-sm mb-6">
-            Estos pesos se aplican por defecto en las comparaciones. Puedes
-            ajustarlos aquí y se guardarán en este dispositivo.
-          </p>
+        <GlassElement
+          width={0}
+          height={0}
+          radius={16}
+          depth={8}
+          strength={70}
+          chromaticAberration={3}
+          blur={3}
+        >
+          <div className="p-6 mb-8">
+            <h2 className="card-title mb-4">Criterios por defecto</h2>
+            <p className="text-tertiary/80 text-sm mb-6">
+              Estos pesos se aplican por defecto en las comparaciones. Puedes
+              ajustarlos aquí y se guardarán en este dispositivo.
+            </p>
 
-          <div className="space-y-6">
-            {/* Películas */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-tertiary">Películas</h3>
-                <button
-                  className="btn-accent text-sm px-4 py-2 flex items-center gap-2 hover:scale-105 transition-transform"
-                  onClick={() => setMovieCriteria(defaultMovieCriteria)}
-                >
-                  <ArrowPathIcon className="w-4 h-4" />
-                  Restaurar valores
-                </button>
-              </div>
+            <div className="space-y-6">
+              {/* Películas */}
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium text-tertiary">
+                    Películas
+                  </h3>
+                  <button
+                    className="btn-accent text-sm px-4 py-2 flex items-center gap-2 hover:scale-105 transition-transform"
+                    onClick={() => setMovieCriteria(defaultMovieCriteria)}
+                  >
+                    <ArrowPathIcon className="w-4 h-4" />
+                    Restaurar valores
+                  </button>
+                </div>
 
-              {/* Grid de criterios */}
-              <div className="grid md:grid-cols-2 gap-4 mb-6">
-                {movieCriteria.map((c, i) => {
-                  const colors = getColorClasses(c.weight);
-                  return (
-                    <div
-                      key={c.key}
-                      className={`glass-panel p-4 border-2 bg-gradient-to-br ${colors.bg} ${colors.border} transition-all duration-300 hover:scale-[1.02] hover:shadow-lg`}
-                    >
-                      {/* Header con nombre y valor */}
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm font-medium text-tertiary">
-                          {c.name}
-                        </span>
-                        <span className={`text-2xl font-bold ${colors.text}`}>
-                          {c.weight}
-                        </span>
-                      </div>
-
-                      {/* Barras de intensidad visual */}
-                      <div className="flex items-end justify-between gap-1 h-12 mb-3">
-                        {Array.from({ length: 10 }).map((_, level) => {
-                          const isActive = level < c.weight;
-                          const barColors = getColorClasses(level + 1);
-                          return (
-                            <div
-                              key={level}
-                              className={`flex-1 rounded-t transition-all duration-500 ${
-                                isActive
-                                  ? `bg-gradient-to-t ${barColors.gradient} opacity-80`
-                                  : "bg-white/5"
-                              }`}
-                              style={{
-                                height: `${((level + 1) / 10) * 100}%`,
-                                transitionDelay: `${level * 20}ms`,
-                              }}
-                            />
-                          );
-                        })}
-                      </div>
-
-                      {/* Slider */}
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-tertiary/50 w-4">
-                            1
+                {/* Grid de criterios */}
+                <div className="grid md:grid-cols-2 gap-4 mb-6">
+                  {movieCriteria.map((c, i) => {
+                    const colors = getColorClasses(c.weight);
+                    return (
+                      <div
+                        key={c.key}
+                        className={`glass-panel p-4 border-2 bg-gradient-to-br ${colors.bg} ${colors.border} transition-all duration-300 hover:scale-[1.02] hover:shadow-lg`}
+                      >
+                        {/* Header con nombre y valor */}
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-sm font-medium text-tertiary">
+                            {c.name}
                           </span>
-                          <div className="flex-grow relative">
-                            <input
-                              type="range"
-                              min="1"
-                              max="10"
-                              value={c.weight}
-                              onChange={(e) =>
-                                updateCrit(
-                                  movieCriteria,
-                                  i,
-                                  parseInt(e.target.value),
-                                  setMovieCriteria
-                                )
-                              }
-                              className={`slider-${c.key} w-full h-2 rounded-lg appearance-none cursor-pointer`}
-                              style={{
-                                background: `linear-gradient(to right, 
+                          <span className={`text-2xl font-bold ${colors.text}`}>
+                            {c.weight}
+                          </span>
+                        </div>
+
+                        {/* Barras de intensidad visual */}
+                        <div className="flex items-end justify-between gap-1 h-12 mb-3">
+                          {Array.from({ length: 10 }).map((_, level) => {
+                            const isActive = level < c.weight;
+                            const barColors = getColorClasses(level + 1);
+                            return (
+                              <div
+                                key={level}
+                                className={`flex-1 rounded-t transition-all duration-500 ${
+                                  isActive
+                                    ? `bg-gradient-to-t ${barColors.gradient} opacity-80`
+                                    : "bg-white/5"
+                                }`}
+                                style={{
+                                  height: `${((level + 1) / 10) * 100}%`,
+                                  transitionDelay: `${level * 20}ms`,
+                                }}
+                              />
+                            );
+                          })}
+                        </div>
+
+                        {/* Slider */}
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-tertiary/50 w-4">
+                              1
+                            </span>
+                            <div className="flex-grow relative">
+                              <input
+                                type="range"
+                                min="1"
+                                max="10"
+                                value={c.weight}
+                                onChange={(e) =>
+                                  updateCrit(
+                                    movieCriteria,
+                                    i,
+                                    parseInt(e.target.value),
+                                    setMovieCriteria
+                                  )
+                                }
+                                className={`slider-${c.key} w-full h-2 rounded-lg appearance-none cursor-pointer`}
+                                style={{
+                                  background: `linear-gradient(to right, 
                                   rgb(120, 53, 15) 0%, 
                                   rgb(146, 64, 14) 25%, 
                                   rgb(217, 119, 6) 50%, 
                                   rgb(245, 158, 11) 75%, 
                                   rgb(251, 191, 36) 100%)`,
-                              }}
-                            />
-                            <style
-                              dangerouslySetInnerHTML={{
-                                __html: `
+                                }}
+                              />
+                              <style
+                                dangerouslySetInnerHTML={{
+                                  __html: `
                               .slider-${c.key}::-webkit-slider-thumb {
                                 appearance: none;
                                 width: 20px;
@@ -379,88 +391,99 @@ const Settings: React.FC = () => {
                                 transform: scale(1.5);
                               }
                             `,
+                                }}
+                              />
+                            </div>
+                            <span className="text-xs text-tertiary/50 w-4">
+                              10
+                            </span>
+                          </div>
+
+                          {/* Barra de progreso visual */}
+                          <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full bg-gradient-to-r ${colors.gradient} transition-all duration-500 shadow-lg`}
+                              style={{
+                                width: `${(c.weight / 10) * 100}%`,
+                                boxShadow: `0 0 10px ${
+                                  c.weight <= 3
+                                    ? "rgba(120, 53, 15, 0.5)"
+                                    : c.weight <= 5
+                                    ? "rgba(146, 64, 14, 0.5)"
+                                    : c.weight <= 7
+                                    ? "rgba(217, 119, 6, 0.5)"
+                                    : "rgba(251, 191, 36, 0.5)"
+                                }`,
                               }}
                             />
                           </div>
-                          <span className="text-xs text-tertiary/50 w-4">
-                            10
-                          </span>
-                        </div>
-
-                        {/* Barra de progreso visual */}
-                        <div className="h-1 bg-white/5 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full bg-gradient-to-r ${colors.gradient} transition-all duration-500 shadow-lg`}
-                            style={{
-                              width: `${(c.weight / 10) * 100}%`,
-                              boxShadow: `0 0 10px ${
-                                c.weight <= 3
-                                  ? "rgba(120, 53, 15, 0.5)"
-                                  : c.weight <= 5
-                                  ? "rgba(146, 64, 14, 0.5)"
-                                  : c.weight <= 7
-                                  ? "rgba(217, 119, 6, 0.5)"
-                                  : "rgba(251, 191, 36, 0.5)"
-                              }`,
-                            }}
-                          />
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
 
-              {/* Panel de resumen */}
-              <div className="glass-panel p-4 border-2 border-accent/30 bg-gradient-to-br from-accent/5 to-primary/5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-tertiary/70 mb-1">
-                      Peso total de criterios
-                    </p>
-                    <p className="text-xs text-tertiary/50">
-                      Suma de todos los pesos configurados
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-4xl font-bold text-accent">
-                      {totalMovieWeight}
-                    </p>
-                    <p className="text-xs text-tertiary/70">
-                      / {movieCriteria.length * 10}
-                    </p>
+                {/* Panel de resumen */}
+                <div className="glass-panel p-4 border-2 border-accent/30 bg-gradient-to-br from-accent/5 to-primary/5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-tertiary/70 mb-1">
+                        Peso total de criterios
+                      </p>
+                      <p className="text-xs text-tertiary/50">
+                        Suma de todos los pesos configurados
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-4xl font-bold text-accent">
+                        {totalMovieWeight}
+                      </p>
+                      <p className="text-xs text-tertiary/70">
+                        / {movieCriteria.length * 10}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </section>
+        </GlassElement>
 
-        <section className="glass-panel p-6 mb-8">
-          <h2 className="card-title mb-4">Límite de comparación</h2>
-          <p className="text-tertiary/80 text-sm mb-4">
-            Configura cuántas películas puedes seleccionar para comparar.
-          </p>
-          <div className="flex items-center gap-4">
-            <label htmlFor="limitMovies" className="text-tertiary">
-              Películas
-            </label>
-            <input
-              id="limitMovies"
-              type="number"
-              min={2}
-              max={30}
-              value={movieCompareLimit}
-              onChange={(e) =>
-                setMovieCompareLimit(
-                  Math.max(2, Math.min(30, parseInt(e.target.value || "0")))
-                )
-              }
-              className="glass-input w-28 px-3 py-2 rounded"
-            />
-            <span className="text-tertiary/70 text-sm">entre 2 y 30</span>
+        <GlassElement
+          width={0}
+          height={0}
+          radius={16}
+          depth={8}
+          strength={70}
+          chromaticAberration={3}
+          blur={3}
+        >
+          <div className="p-6 mb-8">
+            <h2 className="card-title mb-4">Límite de comparación</h2>
+            <p className="text-tertiary/80 text-sm mb-4">
+              Configura cuántas películas puedes seleccionar para comparar.
+            </p>
+            <div className="flex items-center gap-4">
+              <label htmlFor="limitMovies" className="text-tertiary">
+                Películas
+              </label>
+              <input
+                id="limitMovies"
+                type="number"
+                min={2}
+                max={30}
+                value={movieCompareLimit}
+                onChange={(e) =>
+                  setMovieCompareLimit(
+                    Math.max(2, Math.min(30, parseInt(e.target.value || "0")))
+                  )
+                }
+                className="glass-input w-28 px-3 py-2 rounded"
+              />
+              <span className="text-tertiary/70 text-sm">entre 2 y 30</span>
+            </div>
           </div>
-        </section>
+        </GlassElement>
       </main>
     </div>
   );

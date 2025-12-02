@@ -14,6 +14,7 @@ import {
 import HorizontalCarousel from "./HorizontalCarousel";
 import MovieSearch from "./MovieSearch";
 import { useNavigate } from "react-router-dom";
+import { GlassElement } from "../shared/Liquid Glass/GlassElement";
 
 const MoviesPage: React.FC = () => {
   const [popular, setPopular] = useState<Movie[]>([]);
@@ -122,9 +123,21 @@ const MoviesPage: React.FC = () => {
         <h1 className="text-3xl font-bold text-tertiary mb-6 section-title">
           Películas
         </h1>
-        <div className="glass-panel p-6 mb-6">
-          <h2 className="card-title mb-4">Buscar películas</h2>
-          <MovieSearch onMovieSelect={openDetails} selectedMovies={[]} />
+        <div className="mb-6">
+          <GlassElement
+            width={0}
+            height={0}
+            radius={16}
+            depth={8}
+            strength={70}
+            chromaticAberration={3}
+            blur={3}
+          >
+            <div className="p-6">
+              <h2 className="card-title mb-4">Buscar películas</h2>
+              <MovieSearch onMovieSelect={openDetails} selectedMovies={[]} />
+            </div>
+          </GlassElement>
         </div>
         {error && (
           <div

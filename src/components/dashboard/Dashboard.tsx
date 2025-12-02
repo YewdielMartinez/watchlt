@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, memo } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import {
   getPopularMovies,
@@ -14,6 +14,7 @@ import Navbar from "../layout/Navbar";
 import { useUI } from "../../contexts/UIContext";
 import HorizontalCarousel from "../movies/HorizontalCarousel";
 import { useNavigate } from "react-router-dom";
+import { GlassElement } from "../shared/Liquid Glass/GlassElement";
 
 const Dashboard: React.FC = () => {
   const { currentUser, isGuest } = useAuth();
@@ -28,6 +29,19 @@ const Dashboard: React.FC = () => {
   const [recommended, setRecommended] = useState<Movie[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLocalLoading] = useState(true);
+
+  // Memoizar los datos para evitar re-renders innecesarios
+  const memoizedData = useMemo(
+    () => ({
+      popular,
+      topRated,
+      upcoming,
+      nowPlaying,
+      trendingMovies,
+      recommended,
+    }),
+    [popular, topRated, upcoming, nowPlaying, trendingMovies, recommended]
+  );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -82,12 +96,12 @@ const Dashboard: React.FC = () => {
       <Navbar />
 
       <main className="container mx-auto px-4 py-8 content-container">
-        <h1 className="text-3xl font-bold text-tertiary mb-6 section-title">
+        <h1 className="text-3xl font-bold text-tertiary mb-8 section-title">
           {currentUser?.displayName
-            ? `Bienvenido, ${currentUser.displayName}`
+            ? `Hola, ${currentUser.displayName}`
             : isGuest
-            ? "Bienvenido, Invitado"
-            : "Bienvenido"}
+            ? "Hola, Invitado"
+            : "Hola"}
         </h1>
 
         {error && (
@@ -101,12 +115,24 @@ const Dashboard: React.FC = () => {
 
         <div className="grid grid-cols-1 gap-6">
           <div>
-            <div className="glass-panel p-6 mb-6">
-              <h2 className="card-title mb-4">Buscar películas</h2>
-              <MovieSearch
-                onMovieSelect={handleOpenDetails}
-                selectedMovies={[]}
-              />
+            <div className="mb-8">
+              <GlassElement
+                width={0}
+                height={0}
+                radius={20}
+                depth={10}
+                strength={80}
+                chromaticAberration={3}
+                blur={4}
+              >
+                <div className="p-6">
+                  <h2 className="card-title mb-4">Buscar películas</h2>
+                  <MovieSearch
+                    onMovieSelect={handleOpenDetails}
+                    selectedMovies={[]}
+                  />
+                </div>
+              </GlassElement>
             </div>
             {/* Carruseles debajo del buscador */}
             {!loading && (

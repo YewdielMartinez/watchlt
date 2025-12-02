@@ -34,6 +34,7 @@ import {
 } from "@heroicons/react/24/solid";
 import { addToCompare } from "../../services/compareStore";
 import Alert from "../shared/Alert";
+import { GlassElement } from "../shared/Liquid Glass/GlassElement";
 
 const MovieDetails: React.FC = () => {
   const { id } = useParams();
@@ -373,180 +374,240 @@ const MovieDetails: React.FC = () => {
             {/* Cuerpo distribuido */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <section className="lg:col-span-2 flex flex-col gap-6">
-                <div className="glass-panel p-6">
-                  <h2 className="card-title mb-2">Overview</h2>
-                  <p className="text-tertiary">{movie.overview || "—"}</p>
-                </div>
+                <GlassElement
+                  width={0}
+                  height={0}
+                  radius={16}
+                  depth={8}
+                  strength={70}
+                  chromaticAberration={3}
+                  blur={3}
+                >
+                  <div className="p-6">
+                    <h2 className="card-title mb-2">Sinopsis</h2>
+                    <p className="text-tertiary">{movie.overview || "—"}</p>
+                  </div>
+                </GlassElement>
 
                 {(liked || !!userRating) && (
-                  <div className="glass-panel p-6">
-                    <h3 className="card-title mb-3">¿Por qué te gustó?</h3>
-                    <textarea
-                      className="glass-input w-full min-h-[88px] p-3 text-sm"
-                      placeholder="Escribe en pocas palabras qué te gustó de esta película..."
-                      value={reason}
-                      onChange={(e) => setReason(e.target.value)}
-                    />
-                    <div className="mt-3 flex justify-end">
-                      <button
-                        className="btn-primary text-sm"
-                        disabled={savingReason}
-                        onClick={onSaveReason}
-                      >
-                        {savingReason ? "Guardando…" : "Guardar"}
-                      </button>
-                    </div>
-                    {recs && recs.length > 0 && (
-                      <div className="mt-6">
-                        <h4 className="text-tertiary font-semibold mb-3">
-                          Recomendadas para ti
-                        </h4>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                          {recs.slice(0, 6).map((m) => (
-                            <button
-                              key={m.id}
-                              className="glass-card p-2 text-left hover:scale-105 transition-transform"
-                              onClick={() => navigate(`/movie/${m.id}`)}
-                            >
-                              <img
-                                src={
-                                  m.poster_path
-                                    ? `https://image.tmdb.org/t/p/w342${m.poster_path}`
-                                    : "https://via.placeholder.com/342x513?text=No+Image"
-                                }
-                                alt={m.title}
-                                className="w-full aspect-[2/3] object-cover rounded"
-                              />
-                              <div
-                                className="mt-2 text-xs text-tertiary truncate"
-                                title={m.title}
-                              >
-                                {m.title}
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-                <div className="glass-panel p-6">
-                  <h3 className="card-title mb-4">Reparto principal</h3>
-                  <div className="flex gap-3 overflow-x-auto scrollbar-hide">
-                    {(movie.cast || []).map((c) => (
-                      <button
-                        key={c.id}
-                        className="min-w-[140px] glass-card p-2 text-left hover:scale-105 transition-transform"
-                        onClick={() => navigate(`/person/${c.id}`)}
-                        aria-label={`Ver persona ${c.name}`}
-                      >
-                        <img
-                          src={
-                            c.profile_path
-                              ? `https://image.tmdb.org/t/p/w185${c.profile_path}`
-                              : "https://via.placeholder.com/185x278?text=No+Image"
-                          }
-                          alt={c.name}
-                          className="h-32 w-full object-cover rounded-md mb-2"
-                        />
-                        <div
-                          className="text-sm font-medium text-tertiary truncate"
-                          title={c.name}
-                        >
-                          {c.name}
-                        </div>
-                        <div
-                          className="text-xs text-tertiary/80 truncate"
-                          title={c.character}
-                        >
-                          {c.character}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {movie.crew && movie.crew.length > 0 && (
-                  <div className="glass-panel p-6">
-                    <h3 className="card-title mb-4">Equipo</h3>
-                    <div className="flex gap-3 overflow-x-auto scrollbar-hide">
-                      {movie.crew.map((m) => (
+                  <GlassElement
+                    width={0}
+                    height={0}
+                    radius={16}
+                    depth={8}
+                    strength={70}
+                    chromaticAberration={3}
+                    blur={3}
+                  >
+                    <div className="p-6">
+                      <h3 className="card-title mb-3">¿Por qué te gustó?</h3>
+                      <textarea
+                        className="glass-input w-full min-h-[88px] p-3 text-sm"
+                        placeholder="Escribe en pocas palabras qué te gustó de esta película..."
+                        value={reason}
+                        onChange={(e) => setReason(e.target.value)}
+                      />
+                      <div className="mt-3 flex justify-end">
                         <button
-                          key={m.id + "-" + m.job}
+                          className="btn-primary text-sm"
+                          disabled={savingReason}
+                          onClick={onSaveReason}
+                        >
+                          {savingReason ? "Guardando…" : "Guardar"}
+                        </button>
+                      </div>
+                      {recs && recs.length > 0 && (
+                        <div className="mt-6">
+                          <h4 className="text-tertiary font-semibold mb-3">
+                            Recomendadas para ti
+                          </h4>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                            {recs.slice(0, 6).map((m) => (
+                              <button
+                                key={m.id}
+                                className="glass-card p-2 text-left hover:scale-105 transition-transform"
+                                onClick={() => navigate(`/movie/${m.id}`)}
+                              >
+                                <img
+                                  src={
+                                    m.poster_path
+                                      ? `https://image.tmdb.org/t/p/w342${m.poster_path}`
+                                      : "https://via.placeholder.com/342x513?text=No+Image"
+                                  }
+                                  alt={m.title}
+                                  className="w-full aspect-[2/3] object-cover rounded"
+                                />
+                                <div
+                                  className="mt-2 text-xs text-tertiary truncate"
+                                  title={m.title}
+                                >
+                                  {m.title}
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </GlassElement>
+                )}
+                <GlassElement
+                  width={0}
+                  height={0}
+                  radius={16}
+                  depth={8}
+                  strength={70}
+                  chromaticAberration={3}
+                  blur={3}
+                >
+                  <div className="p-6">
+                    <h3 className="card-title mb-4">Reparto principal</h3>
+                    <div className="flex gap-3 overflow-x-auto scrollbar-hide">
+                      {(movie.cast || []).map((c) => (
+                        <button
+                          key={c.id}
                           className="min-w-[140px] glass-card p-2 text-left hover:scale-105 transition-transform"
-                          onClick={() => navigate(`/person/${m.id}`)}
-                          aria-label={`Ver persona ${m.name}`}
+                          onClick={() => navigate(`/person/${c.id}`)}
+                          aria-label={`Ver persona ${c.name}`}
                         >
                           <img
                             src={
-                              m.profile_path
-                                ? `https://image.tmdb.org/t/p/w185${m.profile_path}`
+                              c.profile_path
+                                ? `https://image.tmdb.org/t/p/w185${c.profile_path}`
                                 : "https://via.placeholder.com/185x278?text=No+Image"
                             }
-                            alt={m.name}
+                            alt={c.name}
                             className="h-32 w-full object-cover rounded-md mb-2"
                           />
                           <div
                             className="text-sm font-medium text-tertiary truncate"
-                            title={m.name}
+                            title={c.name}
                           >
-                            {m.name}
+                            {c.name}
                           </div>
                           <div
                             className="text-xs text-tertiary/80 truncate"
-                            title={m.job}
+                            title={c.character}
                           >
-                            {m.job}
+                            {c.character}
                           </div>
                         </button>
                       ))}
                     </div>
                   </div>
+                </GlassElement>
+
+                {movie.crew && movie.crew.length > 0 && (
+                  <GlassElement
+                    width={0}
+                    height={0}
+                    radius={16}
+                    depth={8}
+                    strength={70}
+                    chromaticAberration={3}
+                    blur={3}
+                  >
+                    <div className="p-6">
+                      <h3 className="card-title mb-4">Equipo</h3>
+                      <div className="flex gap-3 overflow-x-auto scrollbar-hide">
+                        {movie.crew.map((m) => (
+                          <button
+                            key={m.id + "-" + m.job}
+                            className="min-w-[140px] glass-card p-2 text-left hover:scale-105 transition-transform"
+                            onClick={() => navigate(`/person/${m.id}`)}
+                            aria-label={`Ver persona ${m.name}`}
+                          >
+                            <img
+                              src={
+                                m.profile_path
+                                  ? `https://image.tmdb.org/t/p/w185${m.profile_path}`
+                                  : "https://via.placeholder.com/185x278?text=No+Image"
+                              }
+                              alt={m.name}
+                              className="h-32 w-full object-cover rounded-md mb-2"
+                            />
+                            <div
+                              className="text-sm font-medium text-tertiary truncate"
+                              title={m.name}
+                            >
+                              {m.name}
+                            </div>
+                            <div
+                              className="text-xs text-tertiary/80 truncate"
+                              title={m.job}
+                            >
+                              {m.job}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </GlassElement>
                 )}
                 {recs && recs.length > 0 && (
-                  <div className="glass-panel p-6">
-                    <h3 className="card-title mb-4">Recomendaciones</h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                      {recs.map((m) => (
-                        <button
-                          key={m.id}
-                          className="glass-card p-2 text-left hover:scale-105 transition-transform"
-                          onClick={() => navigate(`/movie/${m.id}`)}
-                        >
-                          <img
-                            src={
-                              m.poster_path
-                                ? `https://image.tmdb.org/t/p/w342${m.poster_path}`
-                                : "https://via.placeholder.com/342x513?text=No+Image"
-                            }
-                            alt={m.title}
-                            className="w-full aspect-[2/3] object-cover rounded"
-                          />
-                          <div
-                            className="mt-2 text-xs text-tertiary truncate"
-                            title={m.title}
+                  <GlassElement
+                    width={0}
+                    height={0}
+                    radius={16}
+                    depth={8}
+                    strength={70}
+                    chromaticAberration={3}
+                    blur={3}
+                  >
+                    <div className="p-6">
+                      <h3 className="card-title mb-4">Recomendaciones</h3>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                        {recs.map((m) => (
+                          <button
+                            key={m.id}
+                            className="glass-card p-2 text-left hover:scale-105 transition-transform"
+                            onClick={() => navigate(`/movie/${m.id}`)}
                           >
-                            {m.title}
-                          </div>
-                        </button>
-                      ))}
+                            <img
+                              src={
+                                m.poster_path
+                                  ? `https://image.tmdb.org/t/p/w342${m.poster_path}`
+                                  : "https://via.placeholder.com/342x513?text=No+Image"
+                              }
+                              alt={m.title}
+                              className="w-full aspect-[2/3] object-cover rounded"
+                            />
+                            <div
+                              className="mt-2 text-xs text-tertiary truncate"
+                              title={m.title}
+                            >
+                              {m.title}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  </GlassElement>
                 )}
                 {trailer && (
-                  <div className="glass-panel p-6">
-                    <h3 className="card-title mb-2">Trailer</h3>
-                    <div className="aspect-video rounded overflow-hidden">
-                      <iframe
-                        width="100%"
-                        height="100%"
-                        src={`https://www.youtube.com/embed/${trailer.key}`}
-                        title={trailer.name}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowFullScreen
-                      />
+                  <GlassElement
+                    width={0}
+                    height={0}
+                    radius={16}
+                    depth={8}
+                    strength={70}
+                    chromaticAberration={3}
+                    blur={3}
+                  >
+                    <div className="p-6">
+                      <h3 className="card-title mb-2">Trailer</h3>
+                      <div className="aspect-video rounded overflow-hidden">
+                        <iframe
+                          width="100%"
+                          height="100%"
+                          src={`https://www.youtube.com/embed/${trailer.key}`}
+                          title={trailer.name}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowFullScreen
+                        />
+                      </div>
                     </div>
-                  </div>
+                  </GlassElement>
                 )}
               </section>
               <aside className="lg:col-span-1">
@@ -555,133 +616,166 @@ const MovieDetails: React.FC = () => {
                   (watchProviders.flatrate ||
                     watchProviders.rent ||
                     watchProviders.buy) && (
-                    <div className="glass-panel p-6 mb-6">
-                      <h3 className="card-title mb-4">Dónde ver</h3>
+                    <div className="mb-6">
+                      <GlassElement
+                        width={0}
+                        height={0}
+                        radius={16}
+                        depth={8}
+                        strength={70}
+                        chromaticAberration={3}
+                        blur={3}
+                      >
+                        <div className="p-6">
+                          <h3 className="card-title mb-4">Dónde ver</h3>
 
-                      {watchProviders.flatrate &&
-                        watchProviders.flatrate.length > 0 && (
-                          <div className="mb-4">
-                            <h4 className="text-sm text-tertiary/80 font-semibold mb-2">
-                              Streaming
-                            </h4>
-                            <div className="flex flex-wrap gap-2">
-                              {watchProviders.flatrate.map((provider) => (
-                                <div
-                                  key={provider.provider_id}
-                                  className="glass-card p-2 rounded-lg"
-                                  title={provider.provider_name}
-                                >
-                                  <img
-                                    src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
-                                    alt={provider.provider_name}
-                                    className="w-12 h-12 rounded-md object-cover"
-                                  />
+                          {watchProviders.flatrate &&
+                            watchProviders.flatrate.length > 0 && (
+                              <div className="mb-4">
+                                <h4 className="text-sm text-tertiary/80 font-semibold mb-2">
+                                  Streaming
+                                </h4>
+                                <div className="flex flex-wrap gap-2">
+                                  {watchProviders.flatrate.map((provider) => (
+                                    <div
+                                      key={provider.provider_id}
+                                      className="glass-card p-2 rounded-lg"
+                                      title={provider.provider_name}
+                                    >
+                                      <img
+                                        src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
+                                        alt={provider.provider_name}
+                                        className="w-12 h-12 rounded-md object-cover"
+                                      />
+                                    </div>
+                                  ))}
                                 </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                      {watchProviders.rent &&
-                        watchProviders.rent.length > 0 && (
-                          <div className="mb-4">
-                            <h4 className="text-sm text-tertiary/80 font-semibold mb-2">
-                              Alquilar
-                            </h4>
-                            <div className="flex flex-wrap gap-2">
-                              {watchProviders.rent.map((provider) => (
-                                <div
-                                  key={provider.provider_id}
-                                  className="glass-card p-2 rounded-lg"
-                                  title={provider.provider_name}
-                                >
-                                  <img
-                                    src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
-                                    alt={provider.provider_name}
-                                    className="w-12 h-12 rounded-md object-cover"
-                                  />
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                      {watchProviders.buy && watchProviders.buy.length > 0 && (
-                        <div className="mb-4">
-                          <h4 className="text-sm text-tertiary/80 font-semibold mb-2">
-                            Comprar
-                          </h4>
-                          <div className="flex flex-wrap gap-2">
-                            {watchProviders.buy.map((provider) => (
-                              <div
-                                key={provider.provider_id}
-                                className="glass-card p-2 rounded-lg"
-                                title={provider.provider_name}
-                              >
-                                <img
-                                  src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
-                                  alt={provider.provider_name}
-                                  className="w-12 h-12 rounded-md object-cover"
-                                />
                               </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
+                            )}
 
-                      {watchProviders.link && (
-                        <a
-                          href={watchProviders.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-accent hover:underline mt-2 inline-block"
-                        >
-                          Ver más opciones →
-                        </a>
-                      )}
+                          {watchProviders.rent &&
+                            watchProviders.rent.length > 0 && (
+                              <div className="mb-4">
+                                <h4 className="text-sm text-tertiary/80 font-semibold mb-2">
+                                  Alquilar
+                                </h4>
+                                <div className="flex flex-wrap gap-2">
+                                  {watchProviders.rent.map((provider) => (
+                                    <div
+                                      key={provider.provider_id}
+                                      className="glass-card p-2 rounded-lg"
+                                      title={provider.provider_name}
+                                    >
+                                      <img
+                                        src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
+                                        alt={provider.provider_name}
+                                        className="w-12 h-12 rounded-md object-cover"
+                                      />
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                          {watchProviders.buy &&
+                            watchProviders.buy.length > 0 && (
+                              <div className="mb-4">
+                                <h4 className="text-sm text-tertiary/80 font-semibold mb-2">
+                                  Comprar
+                                </h4>
+                                <div className="flex flex-wrap gap-2">
+                                  {watchProviders.buy.map((provider) => (
+                                    <div
+                                      key={provider.provider_id}
+                                      className="glass-card p-2 rounded-lg"
+                                      title={provider.provider_name}
+                                    >
+                                      <img
+                                        src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
+                                        alt={provider.provider_name}
+                                        className="w-12 h-12 rounded-md object-cover"
+                                      />
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                          {watchProviders.link && (
+                            <a
+                              href={watchProviders.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-accent hover:underline mt-2 inline-block"
+                            >
+                              Ver más opciones →
+                            </a>
+                          )}
+                        </div>
+                      </GlassElement>
                     </div>
                   )}
 
-                <div className="glass-panel p-6">
-                  <h3 className="card-title mb-4">Información</h3>
-                  <dl className="text-sm grid grid-cols-1 gap-3">
-                    <div className="flex justify-between">
-                      <dt className="text-tertiary/80">Estado</dt>
-                      <dd className="text-tertiary">{movie.status || "—"}</dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="text-tertiary/80">Idioma original</dt>
-                      <dd className="text-tertiary">
-                        {movie.original_language?.toUpperCase?.() || "—"}
-                      </dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="text-tertiary/80">Presupuesto</dt>
-                      <dd className="text-tertiary">
-                        {typeof movie.budget === "number"
-                          ? `$${movie.budget.toLocaleString()}`
-                          : "—"}
-                      </dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt className="text-tertiary/80">Ingresos</dt>
-                      <dd className="text-tertiary">
-                        {typeof movie.revenue === "number"
-                          ? `$${movie.revenue.toLocaleString()}`
-                          : "—"}
-                      </dd>
-                    </div>
-                  </dl>
-                </div>
-                <div className="glass-panel p-6 mt-6">
-                  <h3 className="card-title mb-2">Créditos</h3>
-                  <div className="text-sm">
-                    <span className="text-tertiary/80">Director: </span>
-                    <span className="text-tertiary">
-                      {movie.director || "—"}
-                    </span>
+                <GlassElement
+                  width={0}
+                  height={0}
+                  radius={16}
+                  depth={8}
+                  strength={70}
+                  chromaticAberration={3}
+                  blur={3}
+                >
+                  <div className="p-6">
+                    <h3 className="card-title mb-4">Información</h3>
+                    <dl className="text-sm grid grid-cols-1 gap-3">
+                      <div className="flex justify-between">
+                        <dt className="text-tertiary/80">Estado</dt>
+                        <dd className="text-tertiary">{movie.status || "—"}</dd>
+                      </div>
+                      <div className="flex justify-between">
+                        <dt className="text-tertiary/80">Idioma original</dt>
+                        <dd className="text-tertiary">
+                          {movie.original_language?.toUpperCase?.() || "—"}
+                        </dd>
+                      </div>
+                      <div className="flex justify-between">
+                        <dt className="text-tertiary/80">Presupuesto</dt>
+                        <dd className="text-tertiary">
+                          {typeof movie.budget === "number"
+                            ? `$${movie.budget.toLocaleString()}`
+                            : "—"}
+                        </dd>
+                      </div>
+                      <div className="flex justify-between">
+                        <dt className="text-tertiary/80">Ingresos</dt>
+                        <dd className="text-tertiary">
+                          {typeof movie.revenue === "number"
+                            ? `$${movie.revenue.toLocaleString()}`
+                            : "—"}
+                        </dd>
+                      </div>
+                    </dl>
                   </div>
-                </div>
+                </GlassElement>
+                <GlassElement
+                  width={0}
+                  height={0}
+                  radius={16}
+                  depth={8}
+                  strength={70}
+                  chromaticAberration={3}
+                  blur={3}
+                >
+                  <div className="p-6 mt-6">
+                    <h3 className="card-title mb-2">Créditos</h3>
+                    <div className="text-sm">
+                      <span className="text-tertiary/80">Director: </span>
+                      <span className="text-tertiary">
+                        {movie.director || "—"}
+                      </span>
+                    </div>
+                  </div>
+                </GlassElement>
               </aside>
             </div>
           </>

@@ -9,7 +9,6 @@ import {
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { UIProvider } from "./contexts/UIContext";
 import AppBackground from "./components/layout/AppBackground";
-import PageTransition from "./components/layout/PageTransition";
 
 // Lazy load de componentes para mejorar el rendimiento inicial
 const Login = lazy(() => import("./components/auth/Login"));
@@ -46,166 +45,201 @@ const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { currentUser, loading, isGuest } = useAuth();
+  const location = useLocation();
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        Cargando...
-      </div>
-    );
+    return <LoadingFallback />;
   }
 
-  return currentUser || isGuest ? <>{children}</> : <Navigate to="/login" />;
+  // Si no hay usuario, guardar la ruta intentada y redirigir a login
+  if (!currentUser && !isGuest) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return <>{children}</>;
+};
+
+// Componente para rutas de invitados (login/register) - redirige a dashboard si ya está autenticado
+const GuestRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { currentUser, loading, isGuest } = useAuth();
+
+  if (loading) {
+    return <LoadingFallback />;
+  }
+
+  // Si ya está autenticado, redirigir al dashboard
+  if (currentUser || isGuest) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+// Componente para usuarios autenticados solamente (no invitados)
+const AuthOnlyRoute: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const { currentUser, loading } = useAuth();
+
+  if (loading) {
+    return <LoadingFallback />;
+  }
+
+  return currentUser ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
 // Componente wrapper para aplicar transiciones
 const AnimatedRoutes: React.FC = () => {
-  const location = useLocation();
-
   return (
-    <PageTransition key={location.pathname}>
-      <Routes location={location}>
-        <Route
-          path="/login"
-          element={
+    <Routes>
+      {/* Redirect root to login */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
+
+      <Route
+        path="/login"
+        element={
+          <GuestRoute>
             <Suspense fallback={<LoadingFallback />}>
               <Login />
             </Suspense>
-          }
-        />
-        <Route
-          path="/register"
-          element={
+          </GuestRoute>
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          <GuestRoute>
             <Suspense fallback={<LoadingFallback />}>
               <Register />
             </Suspense>
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <PrivateRoute>
-              <Suspense fallback={<LoadingFallback />}>
-                <Dashboard />
-              </Suspense>
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/compare"
-          element={
-            <PrivateRoute>
-              <Suspense fallback={<LoadingFallback />}>
-                <Compare />
-              </Suspense>
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/movies"
-          element={
-            <PrivateRoute>
-              <Suspense fallback={<LoadingFallback />}>
-                <MoviesPage />
-              </Suspense>
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/movies/section/:section"
-          element={
-            <PrivateRoute>
-              <Suspense fallback={<LoadingFallback />}>
-                <MoviesSectionPage />
-              </Suspense>
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/movies/genre/:id"
-          element={
-            <PrivateRoute>
-              <Suspense fallback={<LoadingFallback />}>
-                <MoviesGenrePage />
-              </Suspense>
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/tv"
-          element={
-            <PrivateRoute>
-              <Suspense fallback={<LoadingFallback />}>
-                <TVPage />
-              </Suspense>
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/tv/section/:section"
-          element={
-            <PrivateRoute>
-              <Suspense fallback={<LoadingFallback />}>
-                <TVSectionPage />
-              </Suspense>
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/movie/:id"
-          element={
-            <PrivateRoute>
-              <Suspense fallback={<LoadingFallback />}>
-                <MovieDetails />
-              </Suspense>
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/tv/:id"
-          element={
-            <PrivateRoute>
-              <Suspense fallback={<LoadingFallback />}>
-                <TVDetails />
-              </Suspense>
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/person/:id"
-          element={
-            <PrivateRoute>
-              <Suspense fallback={<LoadingFallback />}>
-                <PersonDetails />
-              </Suspense>
-            </PrivateRoute>
-          }
-        />
-        {/* Configuración: requiere usuario autenticado */}
-        <Route
-          path="/settings"
-          element={
-            <AuthOnlyRoute>
-              <Suspense fallback={<LoadingFallback />}>
-                <Settings />
-              </Suspense>
-            </AuthOnlyRoute>
-          }
-        />
-        {/* Ruta solo para usuarios autenticados (no invitados) */}
-        <Route
-          path="/profile"
-          element={
-            <AuthOnlyRoute>
-              <Suspense fallback={<LoadingFallback />}>
-                <Profile />
-              </Suspense>
-            </AuthOnlyRoute>
-          }
-        />
-        <Route path="/" element={<Navigate to="/dashboard" />} />
-      </Routes>
-    </PageTransition>
+          </GuestRoute>
+        }
+      />
+      <Route
+        path="/dashboard"
+        element={
+          <PrivateRoute>
+            <Suspense fallback={<LoadingFallback />}>
+              <Dashboard />
+            </Suspense>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/compare"
+        element={
+          <PrivateRoute>
+            <Suspense fallback={<LoadingFallback />}>
+              <Compare />
+            </Suspense>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/movies"
+        element={
+          <PrivateRoute>
+            <Suspense fallback={<LoadingFallback />}>
+              <MoviesPage />
+            </Suspense>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/movies/section/:section"
+        element={
+          <PrivateRoute>
+            <Suspense fallback={<LoadingFallback />}>
+              <MoviesSectionPage />
+            </Suspense>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/movies/genre/:id"
+        element={
+          <PrivateRoute>
+            <Suspense fallback={<LoadingFallback />}>
+              <MoviesGenrePage />
+            </Suspense>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/tv"
+        element={
+          <PrivateRoute>
+            <Suspense fallback={<LoadingFallback />}>
+              <TVPage />
+            </Suspense>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/tv/section/:section"
+        element={
+          <PrivateRoute>
+            <Suspense fallback={<LoadingFallback />}>
+              <TVSectionPage />
+            </Suspense>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/movie/:id"
+        element={
+          <PrivateRoute>
+            <Suspense fallback={<LoadingFallback />}>
+              <MovieDetails />
+            </Suspense>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/tv/:id"
+        element={
+          <PrivateRoute>
+            <Suspense fallback={<LoadingFallback />}>
+              <TVDetails />
+            </Suspense>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/person/:id"
+        element={
+          <PrivateRoute>
+            <Suspense fallback={<LoadingFallback />}>
+              <PersonDetails />
+            </Suspense>
+          </PrivateRoute>
+        }
+      />
+      {/* Configuración: requiere usuario autenticado */}
+      <Route
+        path="/settings"
+        element={
+          <AuthOnlyRoute>
+            <Suspense fallback={<LoadingFallback />}>
+              <Settings />
+            </Suspense>
+          </AuthOnlyRoute>
+        }
+      />
+      {/* Ruta solo para usuarios autenticados (no invitados) */}
+      <Route
+        path="/profile"
+        element={
+          <AuthOnlyRoute>
+            <Suspense fallback={<LoadingFallback />}>
+              <Profile />
+            </Suspense>
+          </AuthOnlyRoute>
+        }
+      />
+      {/* Redirección por defecto a login */}
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
   );
 };
 
@@ -223,17 +257,3 @@ function App() {
 }
 
 export default App;
-
-// Componente inline para requerir usuario autenticado (excluye invitados)
-const AuthOnlyRoute: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  const { currentUser, loading } = useAuth();
-  if (loading)
-    return (
-      <div className="flex justify-center items-center h-screen">
-        Cargando...
-      </div>
-    );
-  return currentUser ? <>{children}</> : <Navigate to="/login" />;
-};

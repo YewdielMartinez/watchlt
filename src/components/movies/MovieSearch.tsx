@@ -176,9 +176,9 @@ const MovieSearch: React.FC<MovieSearchProps> = ({
             {searchResults.map((movie, index) => (
               <div
                 key={movie.id}
-                className={`glass-card overflow-hidden cursor-pointer transition-all transform hover:scale-105 ${
+                className={`glass-card overflow-hidden cursor-pointer transition-all duration-300 transform hover:scale-105 ${
                   selectedMovies.find((m) => m.id === movie.id)
-                    ? "border-accent shadow-lg"
+                    ? "border-2 border-accent shadow-2xl ring-4 ring-accent/50 scale-105 bg-accent/10"
                     : index === selectedIndex
                     ? "border-accent/60 shadow-md ring-2 ring-accent/40"
                     : "border-primary"
